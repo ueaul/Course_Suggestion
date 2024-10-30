@@ -1,0 +1,50 @@
+
+
+SELECT MAX(semester_start) AS LastDegreeStarted
+FROM studium;
+20222	
+
+SELECT MIN(semester_start) AS FirstDegreeStarted
+FROM studium;
+20101	
+
+SELECT COUNT(*) AS DegreeStartedNullCount
+FROM studium
+WHERE semester_start IS NULL;
+0	
+
+SELECT semester_start, semester_ende
+FROM studium
+WHERE semester_start IS NULL
+LIMIT 10;
+-
+
+SELECT MAX(semester_ende) AS LastDegreeFinished
+FROM studium;
+20231	
+
+SELECT MIN(semester_ende) AS FirstDegreeFinished
+FROM studium;
+20101	
+
+SELECT semester_start, semester_ende
+FROM studium
+WHERE semester_ende IS NULL
+LIMIT 10;
+-
+
+SELECT COUNT(*) AS DegreeFinishedNullCount
+FROM studium
+WHERE semester_ende IS NULL;
+0	
+
+
+SELECT COUNT(*) AS NumberOfDegreesStarted
+FROM studium;
+74442	
+
+
+SELECT COUNT(*) AS NumberOfStudents
+FROM student;
+66020	
+
