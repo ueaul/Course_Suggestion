@@ -39,3 +39,19 @@ FROM studium;
 
 SELECT COUNT(*) AS NumberOfStudents
 FROM student;
+
+SELECT p.bezeichnung AS Kurs, COUNT(*) AS Count, MIN(s.semester_start) AS Start , MAX(s.semester_ende) AS Ende
+FROM pruefungsleistung p
+JOIN studium s
+ON p.studium_id = s.studium_id 
+WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' and s.studium_art = 'Bachelor'
+GROUP BY p.bezeichnung;
+
+SELECT p.bezeichnung AS Kurs, COUNT(*) AS Count, MIN(s.semester_start) AS Start , MAX(s.semester_ende) AS Ende
+FROM pruefungsleistung p
+JOIN studium s
+ON p.studium_id = s.studium_id 
+WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' and s.studium_art = 'Master'
+GROUP BY p.bezeichnung;
+
+

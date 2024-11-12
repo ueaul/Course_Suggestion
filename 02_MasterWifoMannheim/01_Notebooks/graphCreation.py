@@ -15,12 +15,47 @@ def getCourseName(course):
 
     return course_name
 
-def getFullCourseName(searchString, CourseNames):
-    for courseName in CourseNames:
+def mapGraphToDB_courseName(course):
+    course_name = getCourseName(course)
+    if course_name == "ACC 520 IFRS Accounting and Capital Markets":
+        return "ACC 520 IFRS Reporting and Capital Markets"
+    elif course_name == "ACC 620 Accounting for Financial Instruments and Financial Institutions":
+        return "ACC 620 Accounting for Financial Instruments & Financial Institutions"
+    elif course_name == "CS 710 Selected Topics in Data Science":
+        return "CS 710 Seminar Selected Topics in Data Science"
+    elif course_name == "CS 716 IT-Security":
+        return "CS 716 Seminar IT-Security"
+    elif course_name == "FIN 580 Derivatives I – Basic Strategies and Pricing":
+        return "FIN 580 Derivatives I - Basic Strategies and Pricing"
+    elif course_name == "IS 712 Contemporary Issues in Information Systems Research":
+        return "IS 712 Seminar"
+    elif course_name == "IS 722 Seminar: Context-Aware and Distributed Systems":
+        return "IS 722 Seminar Trends in Distributed Systems"
+    elif course_name == "MAN 655 Corporate Strategy: Managing Business Groups":
+        return "MAN 655  Corporate Strategy: Managing Business Groups"
+    elif course_name == "OPM 503 Transportation I – Land Transport and Shipping":
+        return "OPM 503 Transportation I - Land Transport and Shipping"
+    elif course_name == "OPM 504 Transportation II – Aviation":
+        return "OPM 504 Transportation II: Air Transport"
+    elif course_name == "OPM 544 Demand-driven adaptive supply chain planning":
+        return "OPM 544 Advanced Supply Chain Planning"
+    else:
+        return course_name
+
+def getFullCourseName(searchString, courseNames):
+    for courseName in courseNames:
         if searchString in courseName:
             return courseName
 
     return ""
+
+def getMatchingCourses(searchString, courseNames, mainCourse):
+    matchingCourses = []
+    for courseName in courseNames:
+        if searchString in courseName and not mainCourse in courseName:
+            matchingCourses.append(courseName)
+
+    return matchingCourses
 
 def getCourseNodes(courses):
     nodes = []
@@ -68,6 +103,10 @@ def addBWLEdges(courses):
 
 
 def complete_edges(courses, edges):
+    df_bwl_edges = pd.DataFrame(addBWLEdges(courses), columns=["Outgoing", "Ingoing"])
+
+    edges = pd.concat([edges, df_bwl_edges], ignore_index=True)
+
     additional_edges = addBWLEdges(courses)
 
     prerequisite_index = 0
@@ -89,6 +128,8 @@ def complete_edges(courses, edges):
         row = course[course.iloc[:, 0] == "Vorausgesetzte Kenntnisse"]
         if row.empty:
             row = course[course.iloc[:, 0] == "Voraussetzungen"]
+        if row.empty:
+            row = course[course.iloc[:, 0] == "Prerequisites"]
 
         #Get name of courses with required knowledge
         if not row.empty:
@@ -104,12 +145,14 @@ def complete_edges(courses, edges):
                             additional_edges.append([course_knowledge, course_name])
                     #Course is contained, add all skills associated with that course
                     else:
-                        escaped_course_knowledge = re.escape(course_knowledge)
-                        indices = edges[edges['Outgoing'].str.contains(escaped_course_knowledge, na=False)].index.tolist()
-                        for idx in indices:
-                            knowledge = edges.iloc[idx,1]
-                            if not [knowledge, course_name] in additional_edges:
-                                additional_edges.append([knowledge, course_name])
+                        knowledge_course_names = getMatchingCourses(course_knowledge, course_names, course_name)
+                        for knowledge_course_name in knowledge_course_names:
+                            escaped_course_knowledge = re.escape(knowledge_course_name)
+                            indices = edges[edges['Outgoing'].str.contains(escaped_course_knowledge, na=False)].index.tolist()
+                            for idx in indices:
+                                knowledge = edges.iloc[idx,1]
+                                if not [knowledge, course_name] in additional_edges:
+                                    additional_edges.append([knowledge, course_name])
 
         #Get rows where prerequisite courses are contained
         row = course[course.iloc[:, 0] == "Benötigte Kurse"]
@@ -121,19 +164,23 @@ def complete_edges(courses, edges):
 
                 for prerequisite_course in prerequisite_courses:
                     if "|" in prerequisite_course:
+                        gate_created = False
                         equivalent_courses = [course.strip() for course in prerequisite_course.split("|")]
-                        helper_nodes.append(["OR " + str(prerequisite_index), "white", "prerequisite_gate", "OR"])
-                        additional_edges.append(["OR " + str(prerequisite_index), course_name, 2])
                         for equivalent_course in equivalent_courses:
-                            equivalent_course_name = getFullCourseName(equivalent_course, course_names)
-                            if not equivalent_course_name == "":
-                                additional_edges.append([equivalent_course_name, "OR " + str(prerequisite_index), 2])
-
-                        prerequisite_index +=1
+                            if not equivalent_course == "":
+                                matching_courses = getMatchingCourses(equivalent_course, course_names, course_name)
+                                for matching_course in matching_courses:
+                                    if not gate_created:
+                                        helper_nodes.append(["MIN " + str(prerequisite_index), "white", "prerequisite", "MIN", 1])
+                                        additional_edges.append(["MIN " + str(prerequisite_index), course_name, 1])
+                                        gate_created = True
+                                    additional_edges.append([matching_course, "MIN " + str(prerequisite_index), 1])
+                        if gate_created:
+                            prerequisite_index += 1
                     else:
-                        prerequisite_course_name = getFullCourseName(prerequisite_course, course_names)
-                        if not prerequisite_course_name == "":
-                            additional_edges.append([prerequisite_course_name, course_name, 2])
+                        prerequisite_course_names = getMatchingCourses(prerequisite_course, course_names, course_name)
+                        for prerequisite_course_name in prerequisite_course_names:
+                            additional_edges.append([prerequisite_course_name, course_name, 1])
 
         #Get rows where courses are contained that result into not beeing able to taking this course
         row = course[course.iloc[:, 0] == "Not Taken"]
@@ -143,9 +190,9 @@ def complete_edges(courses, edges):
                 exclusive_courses = [course.strip() for course in exclusive_courses_raw.split(",")]
 
                 for exclusive_course in exclusive_courses:
-                    exclusive_course_name = getFullCourseName(exclusive_course, course_names)
-                    if not exclusive_course_name == "":
-                        additional_edges.append([exclusive_course_name, course_name, -2])
+                    exclusive_course_names = getMatchingCourses(exclusive_course, course_names, course_name)
+                    for exclusive_course_name in exclusive_course_names:
+                        additional_edges.append([exclusive_course_name, course_name, -1])
 
     return additional_edges, helper_nodes
 
