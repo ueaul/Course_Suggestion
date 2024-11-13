@@ -1,14 +1,27 @@
 SELECT 'Identical Course' AS Ergebnis
 WHERE NOT EXISTS (
-    SELECT studium_id FROM studium s JOIN pruefungsleistung p ON s.studium_id = p.studium_id  WHERE p.bezeichnung = 'OPM 504 Transportation II: Air Transport'
+    SELECT s.studium_id 
+    FROM studium s 
+    JOIN pruefungsleistung p ON s.studium_id = p.studium_id  
+    WHERE p.bezeichnung = 'OPM 504 Transportation II: Air Transport'
     EXCEPT
-    SELECT studium_id FROM studium s JOIN pruefungsleistung p ON s.studium_id = p.studium_id  WHERE p.bezeichnung = 'OPM 504 Transportation Management: Aviation'
+    SELECT s.studium_id 
+    FROM studium s 
+    JOIN pruefungsleistung p ON s.studium_id = p.studium_id  
+    WHERE p.bezeichnung = 'OPM 504 Transportation Management: Aviation'
 )
 AND NOT EXISTS (
-    SELECT studium_id FROM studium s JOIN pruefungsleistung p ON s.studium_id = p.studium_id  WHERE p.bezeichnung = 'OPM 504 Transportation Management: Aviation'
+    SELECT s.studium_id 
+    FROM studium s 
+    JOIN pruefungsleistung p ON s.studium_id = p.studium_id  
+    WHERE p.bezeichnung = 'OPM 504 Transportation Management: Aviation'
     EXCEPT
-    SELECT studium_id FROM studium s JOIN pruefungsleistung p ON s.studium_id = p.studium_id  WHERE p.bezeichnung = 'OPM 504 Transportation II: Air Transport'
+    SELECT s.studium_id 
+    FROM studium s 
+    JOIN pruefungsleistung p ON s.studium_id = p.studium_id  
+    WHERE p.bezeichnung = 'OPM 504 Transportation II: Air Transport'
 );
+
 
 
 SELECT 
