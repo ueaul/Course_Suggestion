@@ -193,8 +193,19 @@ def getCourseSkillWeights(graph):
     course_skill_edges = getFilteredEdges(graph, "type", "type", "course", "skill")
     skill_course_edges = getFilteredEdges(graph, "type", "type", "skill", "course")
 
-    #Hier die Datenbankverbindung erstellen
-    conn = sqlite3.connect('Datenbankverbindung')
+    #Hier die Pfade zu den csv Dateien eingeben
+    studium_csv = "path"
+    pruefungsleistung_csv = "path"
+
+    studium_df = pd.read_csv(studium_csv)
+    pruefungsleistung_df = pd.read_csv(pruefungsleistung_csv)
+
+    database = "student_database.db"
+    conn = sqlite3.connect(database)
+
+    studium_df.to_sql("studium", conn, if_exists='replace', index=False)
+    pruefungsleistung_df.to_sql("pruefungsleistung", conn, if_exists='replace', index=False)
+
     cursor = conn.cursor()
 
     for edge in course_skill_edges:
