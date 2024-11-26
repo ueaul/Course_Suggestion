@@ -190,6 +190,7 @@ def getFilteredEdges(graph, outgoing_node_attribute, ingoing_node_attribute, out
 def getCourseSkillWeights(graph):
     course_skill_edge_weights = []
 
+    #Get edges relevant for the script (course -> skill and skill -> course edges)
     course_skill_edges = getFilteredEdges(graph, "type", "type", "course", "skill")
     skill_course_edges = getFilteredEdges(graph, "type", "type", "skill", "course")
 
@@ -208,16 +209,23 @@ def getCourseSkillWeights(graph):
 
     cursor = conn.cursor()
 
+    #Create edge weight for all course -> skill edges
     for edge in course_skill_edges:
         course_providing_skill = edge[0]
         course_providing_skill_mapped = mapGraphToDB_courseName(course_providing_skill)
         skill = edge[1]
+
+        #Get all courses that have an ingoing edge that is outgoing from the considered skill
         courses_requiring_skill = [tmp_edge[1] for tmp_edge in skill_course_edges if tmp_edge[0] == skill]
 
         average_grades_with_course = []
         average_grades_without_course = []
+
+        #Compute average grades for students that passed the courses
         for course_requiring_skill in courses_requiring_skill:
             course_requiring_skill_mapped = mapGraphToDB_courseName(course_requiring_skill)
+
+            #Get the average grade achieved in the course when students completed the considered course prior
             query = """SELECT AVG(note), COUNT(note) 
                        FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
                        WHERE ? LIKE p.bezeichnung || '%' AND s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Bachelor' 
@@ -231,9 +239,10 @@ def getCourseSkillWeights(graph):
             cursor.execute(query, (course_requiring_skill_mapped, course_providing_skill_mapped,))
             results_with_course = cursor.fetchall()
 
+            # Get the average grade achieved in the course when students didn't complete the considered course prior
             query = """SELECT AVG(note), COUNT(note) 
                         FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
-                        WHERE ? LIKE p.bezeichnung || '%' s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Bachelor'
+                        WHERE ? LIKE p.bezeichnung || '%' AND s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Bachelor'
                         AND (p.status = "BE" OR p.status = "NB")
                         AND NOT EXISTS(
                            SELECT *
@@ -244,27 +253,32 @@ def getCourseSkillWeights(graph):
             cursor.execute(query, (course_requiring_skill_mapped, course_providing_skill_mapped,))
             results_without_course = cursor.fetchall()
 
+            #Collect the results if exist
             if results_with_course:
-                average_grades_with_course.append(results_with_course[0], results_with_course[1])
+                average_grades_with_course.append([results_with_course[0][0], results_with_course[0][1]])
             if results_without_course:
-                average_grades_without_course.append(results_without_course[0], results_without_course[1])
+                average_grades_without_course.append([results_without_course[0][0], results_without_course[0][1]])
 
-        average_grade_with_course = 0
-        average_grade_without_course = 0
+        grades_with_course = 0
+        grades_without_course = 0
         count_with_course = 0
         count_without_course = 0
 
+        #summarize average grades
         for grades in average_grades_with_course:
-            average_grade_with_course += grades[0] * grades[1]
+            grades_with_course += grades[0] * grades[1]
             count_with_course += grades[1]
         for grades in average_grades_without_course:
-            average_grade_without_course += grades[0] * grades[1]
+            grades_without_course += grades[0] * grades[1]
             count_without_course += grades[1]
 
-        edge_weight = average_grade_without_course / count_without_course - average_grade_with_course / count_with_course
-        if edge_weight < 0 or average_grade_with_course == 0:
+        #calculate edge weight
+        edge_weight = grades_without_course / count_without_course - grades_with_course / count_with_course
+
+        #Set age weight to zero if result is not representative
+        if edge_weight < 0 or grades_with_course == 0:
             edge_weight = 0
-        course_skill_edge_weights.append(edge_weight, course_providing_skill, skill, count_with_course, count_without_course)
+        course_skill_edge_weights.append([edge_weight, course_providing_skill, skill, count_with_course, count_without_course])
 
     conn.close()
 
