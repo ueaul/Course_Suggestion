@@ -254,9 +254,9 @@ def getCourseSkillWeights(graph):
             results_without_course = cursor.fetchall()
 
             #Collect the results if exist
-            if results_with_course:
+            if results_with_course and results_with_course[0][1] > 0:
                 average_grades_with_course.append([results_with_course[0][0], results_with_course[0][1]])
-            if results_without_course:
+            if results_without_course and results_without_course[0][1] > 0:
                 average_grades_without_course.append([results_without_course[0][0], results_without_course[0][1]])
 
         grades_with_course = 0
