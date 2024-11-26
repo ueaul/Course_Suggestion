@@ -273,11 +273,15 @@ def getCourseSkillWeights(graph):
             count_without_course += grades[1]
 
         #calculate edge weight
-        edge_weight = grades_without_course / count_without_course - grades_with_course / count_with_course
+        if count_with_course > 0 and count_without_course > 0:
+            edge_weight = grades_without_course / count_without_course - grades_with_course / count_with_course
+        else:
+            edge_weight = 0
 
         #Set age weight to zero if result is not representative
-        if edge_weight < 0 or grades_with_course == 0:
+        if edge_weight < 0:
             edge_weight = 0
+            
         course_skill_edge_weights.append([edge_weight, course_providing_skill, skill, count_with_course, count_without_course])
 
     conn.close()
