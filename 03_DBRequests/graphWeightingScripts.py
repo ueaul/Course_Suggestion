@@ -24,5 +24,5 @@ conn.close()
 
 #Creation of skill -> course weights
 weights = gc.getSkillCourseWeights(G, database)
-df = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count with Course", "Count without Course"])
+df = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count"])
 df.to_excel("CourseSkillWeights.xlsx", index = False)
