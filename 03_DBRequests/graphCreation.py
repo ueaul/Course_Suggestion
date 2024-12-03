@@ -326,13 +326,14 @@ def getSkillCourseWeights(graph, database):
     for edge in skill_course_edges:
         skill = edge[0]
         course_requiring_skill = edge[1]
+        course_requiring_skill_mapped = mapGraphToDB_courseName(course_requiring_skill)
 
         query = """SELECT DISTINCT p.studium_id, p.semester
                    FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
                    WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Bachelor' AND 
                    p.status = "BE" AND ? LIKE p.bezeichnung || '%'
                     """
-        cursor.execute(query, (course_requiring_skill,))
+        cursor.execute(query, (course_requiring_skill_mapped,))
         students_passed_course = cursor.fetchall()
 
         skill_levels_for_passing = []
@@ -352,11 +353,11 @@ def getSkillCourseWeights(graph, database):
                 if prior_passed_courses:
                     for course in prior_passed_courses:
                         course_name = mapDBtoGraph_courseName(course[0])
-                        course_name = getFullCourseName(course_name, course_names_graph)
-                        if graph.has_edge(course_name, skill):
-                            skill_level += graph[course_name][skill].get("weight")
+                        course_name_full = getFullCourseName(course_name, course_names_graph)
+                        if graph.has_edge(course_name_full, skill):
+                            skill_level += graph[course_name_full][skill].get("weight")
                         else:
-                            edges_to_check.append([course_name, skill])
+                            edges_to_check.append([course_name, course_name_full, skill])
 
                 skill_levels_for_passing.append(skill_level)
 
