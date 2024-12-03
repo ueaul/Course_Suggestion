@@ -312,7 +312,11 @@ def getCourseSkillWeights(graph, database):
     return course_skill_edge_weights
 
 def getSkillCourseWeights(graph, database):
+    course_names_graph = list(graph.nodes())
+
     skill_course_edge_weights = []
+
+    edges_to_check = []
 
     skill_course_edges = getFilteredEdges(graph, "type", "type", "skill", "course")
 
@@ -325,7 +329,8 @@ def getSkillCourseWeights(graph, database):
 
         query = """SELECT DISTINCT p.studium_id, p.semester
                    FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
-                   WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Bachelor' AND p.status = "BE" AND p.bezeichnung = ?
+                   WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Bachelor' AND 
+                   p.status = "BE" AND ? LIKE p2.bezeichnung || '%'
                     """
         cursor.execute(query, (course_requiring_skill,))
         students_passed_course = cursor.fetchall()
@@ -333,22 +338,25 @@ def getSkillCourseWeights(graph, database):
         skill_levels_for_passing = []
         if students_passed_course:
             for student in students_passed_course:
-                student = student[0]
+                study_id = student[0]
                 semester = student[1]
 
                 query = """SELECT DISTINCT bezeichnung
                            FROM pruefungsleistung
                            WHERE studium_id = ? AND semester < ? AND status = "BE"
                             """
-                cursor.execute(query, (student, semester,))
+                cursor.execute(query, (study_id, semester,))
                 prior_passed_courses = cursor.fetchall()
 
                 skill_level = 0
                 if prior_passed_courses:
                     for course in prior_passed_courses:
                         course_name = mapDBtoGraph_courseName(course[0])
+                        course_name = getFullCourseName(course_name, course_names_graph)
                         if graph.has_edge(course_name, skill):
                             skill_level += graph[course_name][skill].get("weight")
+                        else:
+                            edges_to_check.append([course_name, skill])
 
                 skill_levels_for_passing.append(skill_level)
 
@@ -358,3 +366,5 @@ def getSkillCourseWeights(graph, database):
             average_skill_level_for_passing = 0
         skill_course_edge_weights.append([average_skill_level_for_passing, skill, course_requiring_skill,
                                          len(skill_levels_for_passing)])
+
+    return skill_course_edge_weights, edges_to_check
