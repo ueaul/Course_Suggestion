@@ -330,7 +330,7 @@ def getSkillCourseWeights(graph, database):
         query = """SELECT DISTINCT p.studium_id, p.semester
                    FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
                    WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Bachelor' AND 
-                   p.status = "BE" AND ? LIKE p2.bezeichnung || '%'
+                   p.status = "BE" AND ? LIKE p.bezeichnung || '%'
                     """
         cursor.execute(query, (course_requiring_skill,))
         students_passed_course = cursor.fetchall()
