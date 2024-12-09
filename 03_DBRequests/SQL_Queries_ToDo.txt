@@ -1,38 +1,51 @@
-SELECT 'Identical Course' AS Ergebnis
-WHERE NOT EXISTS (
-    SELECT s.studium_id 
-    FROM studium s 
-    JOIN pruefungsleistung p ON s.studium_id = p.studium_id  
-    WHERE p.bezeichnung = 'OPM 504 Transportation II: Air Transport'
-    EXCEPT
-    SELECT s.studium_id 
-    FROM studium s 
-    JOIN pruefungsleistung p ON s.studium_id = p.studium_id  
-    WHERE p.bezeichnung = 'OPM 504 Transportation Management: Aviation'
-)
-AND NOT EXISTS (
-    SELECT s.studium_id 
-    FROM studium s 
-    JOIN pruefungsleistung p ON s.studium_id = p.studium_id  
-    WHERE p.bezeichnung = 'OPM 504 Transportation Management: Aviation'
-    EXCEPT
-    SELECT s.studium_id 
-    FROM studium s 
-    JOIN pruefungsleistung p ON s.studium_id = p.studium_id  
-    WHERE p.bezeichnung = 'OPM 504 Transportation II: Air Transport'
-);
+SELECT MAX(semester) AS MaxExamSemesterAll
+FROM pruefungsleistung
 
+SELECT p.bezeichnung AS BachelorExam, MAX(p.semester)
+FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
+WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' and s.studium_art = 'Bachelor'
+GROUP BY p.bezeichnung;
 
+SELECT p.bezeichnung AS BachelorExam, MIN(p.semester)
+FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
+WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' and s.studium_art = 'Bachelor'
+GROUP BY p.bezeichnung;
 
-SELECT 
-    AVG1,
-    AVG2,	
-    CASE 
-        WHEN AVG1 = AVG2 THEN 'Identical Course'
-        ELSE 'Different Course'
-    END AS Ergebnis
-FROM (
-    SELECT
-        (SELECT AVG(note) FROM pruefungsleistung WHERE bezeichnung = 'OPM 504 Transportation Management: Aviation') AS AVG1,
-        (SELECT AVG(note) FROM pruefungsleistung WHERE bezeichnung = 'OPM 504 Transportation II: Air Transport') AS AVG2
-) AS avgGrade;
+SELECT status AS statusBachelor, COUNT(*)
+FROM studium
+WHERE studium_bezeichnung = 'Wirtschaftsinformatik' and studium_art = 'Bachelor'
+GROUP BY status;
+
+SELECT p.bezeichnung AS MasterExam, MAX(p.semester) 
+FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
+WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' and s.studium_art = 'Master'
+GROUP BY p.bezeichnung;
+
+SELECT p.bezeichnung MasterExam, MIN(p.semester) 
+FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
+WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' and s.studium_art = 'Master'
+GROUP BY p.bezeichnung;
+
+SELECT status AS statusMaster, COUNT(*)
+FROM studium
+WHERE studium_bezeichnung = 'Wirtschaftsinformatik' and studium_art = 'Master'
+GROUP BY status;
+
+SELECT COUNT(*) AS NumberOfDegreesStartedBachelorWifo
+FROM studium
+WHERE studium_bezeichnung = 'Wirtschaftsinformatik' and studium_art = 'Bachelor';
+
+SELECT COUNT(*) AS NumberOfDegreesStartedMasterWifo
+FROM studium
+WHERE studium_bezeichnung = 'Wirtschaftsinformatik' and studium_art = 'Master';
+
+SELECT status AS statusAll, COUNT(*)
+FROM studium
+GROUP BY status;
+
+SELECT COUNT(*)
+FROM pruefungsleistung;
+
+SELECT COUNT(*)
+FROM pruefungsleistung
+WHERE status = 'BE' or status = 'NB';

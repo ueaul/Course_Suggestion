@@ -25,6 +25,6 @@ conn.close()
 #Creation of skill -> course weights
 weights, edges_to_check = gc.getSkillCourseWeights(G, database)
 df_weights = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count"])
-df_edges_to_check = pd.DataFrame(edges_to_check, columns=["Outgoing", "Ingoing"])
+df_edges_to_check = pd.DataFrame(edges_to_check, columns=["Name", "Name_Full", "Skill"])
 df_weights.to_excel("SkillCourseWeights.xlsx", index = False)
 df_edges_to_check.to_excel("EdgesToCheck.xlsx", index = False)

@@ -54,4 +54,43 @@ ON p.studium_id = s.studium_id
 WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' and s.studium_art = 'Master'
 GROUP BY p.bezeichnung;
 
+SELECT 'Identical Course' AS Ergebnis
+WHERE NOT EXISTS (
+    SELECT s.studium_id 
+    FROM studium s 
+    JOIN pruefungsleistung p ON s.studium_id = p.studium_id  
+    WHERE p.bezeichnung = 'OPM 504 Transportation II: Air Transport'
+    EXCEPT
+    SELECT s.studium_id 
+    FROM studium s 
+    JOIN pruefungsleistung p ON s.studium_id = p.studium_id  
+    WHERE p.bezeichnung = 'OPM 504 Transportation Management: Aviation'
+)
+AND NOT EXISTS (
+    SELECT s.studium_id 
+    FROM studium s 
+    JOIN pruefungsleistung p ON s.studium_id = p.studium_id  
+    WHERE p.bezeichnung = 'OPM 504 Transportation Management: Aviation'
+    EXCEPT
+    SELECT s.studium_id 
+    FROM studium s 
+    JOIN pruefungsleistung p ON s.studium_id = p.studium_id  
+    WHERE p.bezeichnung = 'OPM 504 Transportation II: Air Transport'
+);
+
+
+
+SELECT 
+    AVG1,
+    AVG2,	
+    CASE 
+        WHEN AVG1 = AVG2 THEN 'Identical Course'
+        ELSE 'Different Course'
+    END AS Ergebnis
+FROM (
+    SELECT
+        (SELECT AVG(note) FROM pruefungsleistung WHERE bezeichnung = 'OPM 504 Transportation Management: Aviation') AS AVG1,
+        (SELECT AVG(note) FROM pruefungsleistung WHERE bezeichnung = 'OPM 504 Transportation II: Air Transport') AS AVG2
+) AS avgGrade;
+
 
