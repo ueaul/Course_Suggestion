@@ -43,9 +43,9 @@ SELECT status AS statusAll, COUNT(*)
 FROM studium
 GROUP BY status;
 
-SELECT COUNT(*)
+SELECT COUNT(*) AS countExams
 FROM pruefungsleistung;
 
-SELECT COUNT(*)
+SELECT COUNT(*) countExamsRelevant
 FROM pruefungsleistung
 WHERE status = 'BE' or status = 'NB';
