@@ -49,3 +49,17 @@ FROM pruefungsleistung;
 SELECT COUNT(*) AS countExamsRelevant
 FROM pruefungsleistung
 WHERE status = 'BE' or status = 'NB';
+
+SELECT p.bezeichnung AS BachelorKurs, COUNT(*) AS Count, MIN(s.semester_start) AS Start , MAX(s.semester_ende) AS Ende
+FROM pruefungsleistung p
+JOIN studium s
+ON p.studium_id = s.studium_id 
+WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' and s.studium_art = 'Bachelor' and (p.status = 'BE' or p.status = 'NB')
+GROUP BY p.bezeichnung;
+
+SELECT p.bezeichnung AS MasterKurs, COUNT(*) AS Count, MIN(s.semester_start) AS Start , MAX(s.semester_ende) AS Ende
+FROM pruefungsleistung p
+JOIN studium s
+ON p.studium_id = s.studium_id 
+WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' and s.studium_art = 'Master' and (p.status = 'BE' or p.status = 'NB')
+GROUP BY p.bezeichnung;
