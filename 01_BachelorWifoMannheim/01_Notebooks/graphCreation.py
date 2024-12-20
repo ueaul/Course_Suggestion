@@ -312,7 +312,11 @@ def getCourseSkillWeights(graph, database):
     return course_skill_edge_weights
 
 def getSkillCourseWeights(graph, database):
+    course_names_graph = list(graph.nodes())
+
     skill_course_edge_weights = []
+
+    edges_to_check = []
 
     skill_course_edges = getFilteredEdges(graph, "type", "type", "skill", "course")
 
@@ -322,33 +326,38 @@ def getSkillCourseWeights(graph, database):
     for edge in skill_course_edges:
         skill = edge[0]
         course_requiring_skill = edge[1]
+        course_requiring_skill_mapped = mapGraphToDB_courseName(course_requiring_skill)
 
         query = """SELECT DISTINCT p.studium_id, p.semester
                    FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
-                   WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Bachelor' AND p.status = "BE" AND p.bezeichnung = ?
+                   WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Bachelor' AND 
+                   p.status = "BE" AND ? LIKE p.bezeichnung || '%'
                     """
-        cursor.execute(query, (course_requiring_skill,))
+        cursor.execute(query, (course_requiring_skill_mapped,))
         students_passed_course = cursor.fetchall()
 
         skill_levels_for_passing = []
         if students_passed_course:
             for student in students_passed_course:
-                student = student[0]
+                study_id = student[0]
                 semester = student[1]
 
                 query = """SELECT DISTINCT bezeichnung
                            FROM pruefungsleistung
                            WHERE studium_id = ? AND semester < ? AND status = "BE"
                             """
-                cursor.execute(query, (student, semester,))
+                cursor.execute(query, (study_id, semester,))
                 prior_passed_courses = cursor.fetchall()
 
                 skill_level = 0
                 if prior_passed_courses:
                     for course in prior_passed_courses:
                         course_name = mapDBtoGraph_courseName(course[0])
-                        if graph.has_edge(course_name, skill):
-                            skill_level += graph[course_name][skill].get("weight")
+                        course_name_full = getFullCourseName(course_name, course_names_graph)
+                        if graph.has_edge(course_name_full, skill):
+                            skill_level += graph[course_name_full][skill].get("weight")
+                        else:
+                            edges_to_check.append([course_name, course_name_full, skill])
 
                 skill_levels_for_passing.append(skill_level)
 
@@ -358,3 +367,35 @@ def getSkillCourseWeights(graph, database):
             average_skill_level_for_passing = 0
         skill_course_edge_weights.append([average_skill_level_for_passing, skill, course_requiring_skill,
                                          len(skill_levels_for_passing)])
+
+    return skill_course_edge_weights, edges_to_check
+
+def createPools(graph):
+    for node in graph.nodes:
+        if graph.nodes[node].get("type") == "course":
+            if node.startswith("BA "):
+                graph.nodes[node]["pool"] = "Thesis"
+            elif node.startswith("SM "):
+                graph.nodes[node]["pool"] = "Seminar"
+            elif node in ["Konfliktmanagement", "Kommunikation im Team", "Programmierkurs C/C++", "Sprachkurs"]:
+                graph.nodes[node]["pool"] = "Key Qualification Pool"
+            elif node in ["Zeitmanagement Time Management",
+                          "Präsentationskompetenz und Rhetorik Presentation skills and rhetoric",
+                          "Change- und Projektmanagement Projectmanagement"]:
+                graph.nodes[node]["pool"] = "Key Qualification"
+            elif node in ["Grundlagen der Volkswirtschaftslehre", "Recht"]:
+                graph.nodes[node]["pool"] = "Elective"
+            elif node[0:6] in ["IS 405", "CS 405", "CS 406", "CS 408", "CS 605", "CS 414"] or node[0:7] == "MAN 455":
+                graph.nodes[node]["pool"] = "Specialization"
+            elif node in ["MAT 303 Lineare Algebra I Linear Algebra I",
+                          "ANA 301 Analysis für Wirtschaftsinformatiker Analysis for Business Informatics",
+                          "Grundlagen der Statistik Foundations of Statistics"]:
+                graph.nodes[node]["pool"] = "Mathematics and Statistics"
+            elif node in ["Marketing", "Produktion", "Internes Rechnungswesen",
+                          "Grundlagen des externen Rechnungswesens", "Finanzwirtschaft", "Management"]:
+                graph.nodes[node]["pool"] = "Business|Elective"
+            elif node.startswith("CS "):
+                graph.nodes[node]["pool"] = "Computer Science"
+            elif node.startswith("IS "):
+                graph.nodes[node]["pool"] = "Information Systems"
+    return graph

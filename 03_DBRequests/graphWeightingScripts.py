@@ -4,7 +4,7 @@ import pandas as pd
 import sqlite3
 
 #G = nx.read_graphml("CourseSkillGraph.graphml")
-G_Master = nx.read_graphml("Graph_Master.graphml")
+G_Master = nx.read_graphml("CourseSkillGraph_Master.graphml")
 
 # Hier die Pfade zu den csv Dateien eingeben
 studium_csv = "path"
@@ -34,6 +34,13 @@ conn.close()
 
 #Master
 #Creation of course -> skill weights
-weights = gcM.getCourseSkillWeights(G_Master, database)
-df = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count with Course", "Count without Course"])
-df.to_excel("CourseSkillWeights_Master.xlsx", index = False)
+#weights = gcM.getCourseSkillWeights(G_Master, database)
+#df = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count with Course", "Count without Course"])
+#df.to_excel("CourseSkillWeights_Master.xlsx", index = False)
+
+#Creation of skill -> course weights
+weights, edges_to_check = gcM.getSkillCourseWeights(G_Master, database)
+df_weights = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count"])
+df_edges_to_check = pd.DataFrame(edges_to_check, columns=["Name", "Name_Full", "Skill"])
+df_weights.to_excel("SkillCourseWeights_Master.xlsx", index = False)
+df_edges_to_check.to_excel("EdgesToCheck_Master.xlsx", index = False)

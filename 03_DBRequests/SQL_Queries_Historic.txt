@@ -106,6 +106,12 @@ FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
 WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' and s.studium_art = 'Bachelor'
 GROUP BY p.bezeichnung;
 
+SELECT p.status, COUNT(*) AS count
+FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
+WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' and (s.studium_art = 'Bachelor' or s.studium_art = 'Master')
+GROUP BY p.status;
+
+
 SELECT status AS statusBachelor, COUNT(*)
 FROM studium
 WHERE studium_bezeichnung = 'Wirtschaftsinformatik' and studium_art = 'Bachelor'

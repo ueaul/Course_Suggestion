@@ -24,6 +24,7 @@ FROM studium
 WHERE studium_bezeichnung = 'Wirtschaftsinformatik' and studium_art = 'Master'
 GROUP BY status;
 
+
 B 	11
 BE 	876
 E 	6
