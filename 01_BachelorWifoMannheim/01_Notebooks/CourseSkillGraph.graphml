@@ -378,7 +378,7 @@
       <data key="d2">grey</data>
       <data key="d3">course</data>
       <data key="d4">False</data>
-      <data key="d5">Business, Elective</data>
+      <data key="d5">Business|Elective</data>
     </node>
     <node id="Internes Rechnungswesen">
       <data key="d0">6</data>
@@ -386,7 +386,7 @@
       <data key="d2">grey</data>
       <data key="d3">course</data>
       <data key="d4">False</data>
-      <data key="d5">Business, Elective</data>
+      <data key="d5">Business|Elective</data>
     </node>
     <node id="Finanzwirtschaft">
       <data key="d0">6</data>
@@ -394,7 +394,7 @@
       <data key="d2">grey</data>
       <data key="d3">course</data>
       <data key="d4">False</data>
-      <data key="d5">Business, Elective</data>
+      <data key="d5">Business|Elective</data>
     </node>
     <node id="Marketing">
       <data key="d0">6</data>
@@ -402,7 +402,7 @@
       <data key="d2">grey</data>
       <data key="d3">course</data>
       <data key="d4">False</data>
-      <data key="d5">Business, Elective</data>
+      <data key="d5">Business|Elective</data>
     </node>
     <node id="Produktion">
       <data key="d0">6</data>
@@ -410,7 +410,7 @@
       <data key="d2">grey</data>
       <data key="d3">course</data>
       <data key="d4">False</data>
-      <data key="d5">Business, Elective</data>
+      <data key="d5">Business|Elective</data>
     </node>
     <node id="Management">
       <data key="d0">6</data>
@@ -418,7 +418,7 @@
       <data key="d2">grey</data>
       <data key="d3">course</data>
       <data key="d4">False</data>
-      <data key="d5">Business, Elective</data>
+      <data key="d5">Business|Elective</data>
     </node>
     <node id="MAT 303 Lineare Algebra I Linear Algebra I">
       <data key="d0">9</data>
