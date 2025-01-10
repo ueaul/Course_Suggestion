@@ -17,6 +17,10 @@ N 	21
 NB 	110
 R 	559
 
+unklar:
+B
+E
+
 
 
 SELECT status AS statusMaster, COUNT(*)

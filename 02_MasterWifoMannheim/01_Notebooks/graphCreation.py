@@ -240,7 +240,7 @@ def getFilteredEdges(graph, outgoing_node_attribute, ingoing_node_attribute, out
     return filteredEdges
 
 
-def getCourseSkillWeights(graph, database):
+def getCourseSkillWeights(graph, database, min):
     course_skill_edge_weights = []
 
     #Get edges relevant for the script (course -> skill and skill -> course edges)
@@ -270,7 +270,7 @@ def getCourseSkillWeights(graph, database):
             query = """SELECT AVG(note), COUNT(note) 
                        FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
                        WHERE ? LIKE p.bezeichnung || '%' AND s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Master' 
-                       AND (p.status = "BE" OR p.status = "NB")
+                       AND p.status IN ("BE", "NB") AND s.status IN ("BE", "R", "NB", "N")
                        AND EXISTS(
                            SELECT *
                            FROM pruefungsleistung p2 JOIN studium s2 ON p2.studium_id = s2.studium_id
@@ -284,7 +284,7 @@ def getCourseSkillWeights(graph, database):
             query = """SELECT AVG(note), COUNT(note) 
                         FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
                         WHERE ? LIKE p.bezeichnung || '%' AND s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Master'
-                        AND (p.status = "BE" OR p.status = "NB")
+                        AND p.status IN ("BE", "NB") AND s.status IN ("BE", "R", "NB", "N")
                         AND NOT EXISTS(
                            SELECT *
                            FROM pruefungsleistung p2 JOIN studium s2 ON p2.studium_id = s2.studium_id
@@ -317,11 +317,11 @@ def getCourseSkillWeights(graph, database):
         if count_with_course > 0 and count_without_course > 0:
             edge_weight = grades_without_course / count_without_course - grades_with_course / count_with_course
         else:
-            edge_weight = 0
+            edge_weight = min
 
         #Set age weight to zero if result is not representative
-        if edge_weight < 0:
-            edge_weight = 0
+        if edge_weight < min:
+            edge_weight = min
 
         course_skill_edge_weights.append([edge_weight, course_providing_skill, skill, count_with_course, count_without_course])
 
@@ -349,7 +349,7 @@ def getSkillCourseWeights(graph, database):
         query = """SELECT DISTINCT p.studium_id, p.semester
                    FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
                    WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Master' AND 
-                   p.status = "BE" AND ? LIKE p.bezeichnung || '%'
+                   p.status = "BE" AND ? LIKE p.bezeichnung || '%' AND s.status IN ("BE", "R", "NB", "N")
                     """
         cursor.execute(query, (course_requiring_skill_mapped,))
         students_passed_course = cursor.fetchall()

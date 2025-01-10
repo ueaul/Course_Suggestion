@@ -1,6 +1,7 @@
+import pandas as pd
+import graphCreation as gc
 import re
 import networkx as nx
-import pandas as pd
 import sqlite3
 
 def getCourseName(course):
@@ -137,6 +138,8 @@ def complete_edges(courses, edges):
 
         # Get name of course
         course_name = getCourseName(course)
+        if course_name == "CS 308 Softwaretechnik I Software Engineering I":
+            print("hier")
 
         # Get row where courses containing required knowledge are contained
         row = course[course.iloc[:, 0] == "Vorausgesetzte Kenntnisse"]
@@ -222,7 +225,7 @@ def getFilteredEdges(graph, outgoing_node_attribute, ingoing_node_attribute, out
 
     return filteredEdges
 
-def getCourseSkillWeights(graph, database):
+def getCourseSkillWeights(graph, database, min):
     course_skill_edge_weights = []
 
     #Get edges relevant for the script (course -> skill and skill -> course edges)
@@ -252,7 +255,7 @@ def getCourseSkillWeights(graph, database):
             query = """SELECT AVG(note), COUNT(note) 
                        FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
                        WHERE ? LIKE p.bezeichnung || '%' AND s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Bachelor' 
-                       AND (p.status = "BE" OR p.status = "NB")
+                       AND p.status IN ("BE", "NB") AND s.status IN ("BE", "R", "NB", "N")
                        AND EXISTS(
                            SELECT *
                            FROM pruefungsleistung p2 JOIN studium s2 ON p2.studium_id = s2.studium_id
@@ -266,7 +269,7 @@ def getCourseSkillWeights(graph, database):
             query = """SELECT AVG(note), COUNT(note) 
                         FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
                         WHERE ? LIKE p.bezeichnung || '%' AND s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Bachelor'
-                        AND (p.status = "BE" OR p.status = "NB")
+                        AND p.status IN ("BE", "NB") AND s.status IN ("BE", "R", "NB", "N")
                         AND NOT EXISTS(
                            SELECT *
                            FROM pruefungsleistung p2 JOIN studium s2 ON p2.studium_id = s2.studium_id
@@ -299,11 +302,11 @@ def getCourseSkillWeights(graph, database):
         if count_with_course > 0 and count_without_course > 0:
             edge_weight = grades_without_course / count_without_course - grades_with_course / count_with_course
         else:
-            edge_weight = 0
+            edge_weight = min
 
-        #Set age weight to zero if result is not representative
-        if edge_weight < 0:
-            edge_weight = 0
+        #Set age weight to min if result is too small or not representative
+        if edge_weight < min:
+            edge_weight = min
 
         course_skill_edge_weights.append([edge_weight, course_providing_skill, skill, count_with_course, count_without_course])
 
@@ -331,7 +334,7 @@ def getSkillCourseWeights(graph, database):
         query = """SELECT DISTINCT p.studium_id, p.semester
                    FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
                    WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Bachelor' AND 
-                   p.status = "BE" AND ? LIKE p.bezeichnung || '%'
+                   p.status = "BE" AND ? LIKE p.bezeichnung || '%' AND s.status IN ("BE", "R", "NB", "N")
                     """
         cursor.execute(query, (course_requiring_skill_mapped,))
         students_passed_course = cursor.fetchall()
@@ -399,3 +402,33 @@ def createPools(graph):
             elif node.startswith("IS "):
                 graph.nodes[node]["pool"] = "Information Systems"
     return graph
+
+courses = []
+for i in range(0,54):
+    path = "../03_Courses/Course" + str(i) + ".xlsx"
+    df = pd.read_excel(path, dtype=str).fillna('')
+    courses.append(df)
+
+G = nx.DiGraph()
+
+course_nodes = gc.getCourseNodes(courses)
+knowledge_nodes = pd.read_excel("../04_Graph/knowledgeAreas.xlsx").values.tolist()
+edges_df = pd.read_excel("../04_Graph/edges.xlsx")
+edges = edges_df.values.tolist()
+
+for node in course_nodes:
+    G.add_node(node[0], ECTS=node[1], offering_cycle=node[2], color="grey", type="course", active = False)
+
+#Create Skill Nodes
+for i in range(len(knowledge_nodes)):
+    if i <= 16:
+        G.add_node(knowledge_nodes[i][0], color="blue", type="skill", active = False)
+    elif i > 16 and i <= 22:
+        G.add_node(knowledge_nodes[i][0], color="green", type="skill", active = False)
+    else:
+        G.add_node(knowledge_nodes[i][0], color="brown", type="skill", active = False)
+
+for edge in edges:
+   G.add_edge(edge[0], edge[1], active = False)
+
+additional_edges, additional_nodes = complete_edges(courses, edges_df)

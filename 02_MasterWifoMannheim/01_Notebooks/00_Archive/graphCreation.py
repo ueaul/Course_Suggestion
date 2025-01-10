@@ -1,5 +1,7 @@
 import pandas as pd
 import re
+import sqlite3
+
 
 def getCourseName(course):
     course_name = ""
@@ -15,8 +17,10 @@ def getCourseName(course):
 
     return course_name
 
-def mapGraphToDB_courseName(course):
-    course_name = getCourseName(course)
+def mapGraphToDB_courseName(course_name):
+    if isinstance(course_name, pd.DataFrame):
+        course_name = getCourseName(course_name)
+
     if course_name == "ACC 520 IFRS Accounting and Capital Markets":
         return "ACC 520 IFRS Reporting and Capital Markets"
     elif course_name == "ACC 620 Accounting for Financial Instruments and Financial Institutions":
@@ -39,6 +43,35 @@ def mapGraphToDB_courseName(course):
         return "OPM 504 Transportation II: Air Transport"
     elif course_name == "OPM 544 Demand-driven adaptive supply chain planning":
         return "OPM 544 Advanced Supply Chain Planning"
+    else:
+        return course_name
+
+def mapDBtoGraph_courseName(course_name):
+    if isinstance(course_name, pd.DataFrame):
+        course_name = getCourseName(course_name)
+
+    if course_name == "ACC 520 IFRS Reporting and Capital Markets":
+        return "ACC 520 IFRS Accounting and Capital Markets"
+    elif course_name == "ACC 620 Accounting for Financial Instruments & Financial Institutions":
+        return "ACC 620 Accounting for Financial Instruments and Financial Institutions"
+    elif course_name == "CS 710 Seminar Selected Topics in Data Science":
+        return "CS 710 Selected Topics in Data Science"
+    elif course_name == "CS 716 Seminar IT-Security":
+        return "CS 716 IT-Security"
+    elif course_name == "FIN 580 Derivatives I - Basic Strategies and Pricing":
+        return "FIN 580 Derivatives I – Basic Strategies and Pricing"
+    elif course_name == "IS 712 Seminar":
+        return "IS 712 Contemporary Issues in Information Systems Research"
+    elif course_name == "IS 722 Seminar Trends in Distributed Systems":
+        return "IS 722 Seminar: Context-Aware and Distributed Systems"
+    elif course_name == "MAN 655  Corporate Strategy: Managing Business Groups":
+        return "MAN 655 Corporate Strategy: Managing Business Groups"
+    elif course_name == "OPM 503 Transportation I - Land Transport and Shipping":
+        return "OPM 503 Transportation I – Land Transport and Shipping"
+    elif course_name == "OPM 504 Transportation II: Air Transport":
+        return "OPM 504 Transportation II – Aviation"
+    elif course_name == "OPM 544 Advanced Supply Chain Planning":
+        return "OPM 544 Demand-driven adaptive supply chain planning"
     else:
         return course_name
 
@@ -196,4 +229,161 @@ def complete_edges(courses, edges):
 
     return additional_edges, helper_nodes
 
+def getFilteredEdges(graph, outgoing_node_attribute, ingoing_node_attribute, outgoing_node_value, ingoing_node_value):
+    filteredEdges = []
 
+    for u, v in graph.edges():
+        if (graph.nodes[u].get(outgoing_node_attribute) == outgoing_node_value and
+                graph.nodes[v].get(ingoing_node_attribute) == ingoing_node_value):
+            filteredEdges.append((u,v))
+
+    return filteredEdges
+
+
+def getCourseSkillWeights(graph, database, min):
+    course_skill_edge_weights = []
+
+    #Get edges relevant for the script (course -> skill and skill -> course edges)
+    course_skill_edges = getFilteredEdges(graph, "type", "type", "course", "skill")
+    skill_course_edges = getFilteredEdges(graph, "type", "type", "skill", "course")
+
+    conn = sqlite3.connect(database)
+    cursor = conn.cursor()
+
+    #Create edge weight for all course -> skill edges
+    for edge in course_skill_edges:
+        course_providing_skill = edge[0]
+        course_providing_skill_mapped = mapGraphToDB_courseName(course_providing_skill)
+        skill = edge[1]
+
+        #Get all courses that have an ingoing edge that is outgoing from the considered skill
+        courses_requiring_skill = [tmp_edge[1] for tmp_edge in skill_course_edges if tmp_edge[0] == skill]
+
+        average_grades_with_course = []
+        average_grades_without_course = []
+
+        #Compute average grades for students that passed the courses
+        for course_requiring_skill in courses_requiring_skill:
+            course_requiring_skill_mapped = mapGraphToDB_courseName(course_requiring_skill)
+
+            #Get the average grade achieved in the course when students completed the considered course prior
+            query = """SELECT AVG(note), COUNT(note) 
+                       FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
+                       WHERE ? LIKE p.bezeichnung || '%' AND s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Master' 
+                       AND (p.status = "BE" OR p.status = "NB")
+                       AND EXISTS(
+                           SELECT *
+                           FROM pruefungsleistung p2 JOIN studium s2 ON p2.studium_id = s2.studium_id
+                           WHERE ? LIKE p2.bezeichnung || '%' AND p2.semester < p.semester AND p2.status = "BE" AND p2.studium_id = p.studium_id
+                        )
+                        """
+            cursor.execute(query, (course_requiring_skill_mapped, course_providing_skill_mapped,))
+            results_with_course = cursor.fetchall()
+
+            # Get the average grade achieved in the course when students didn't complete the considered course prior
+            query = """SELECT AVG(note), COUNT(note) 
+                        FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
+                        WHERE ? LIKE p.bezeichnung || '%' AND s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Master'
+                        AND (p.status = "BE" OR p.status = "NB")
+                        AND NOT EXISTS(
+                           SELECT *
+                           FROM pruefungsleistung p2 JOIN studium s2 ON p2.studium_id = s2.studium_id
+                           WHERE ? LIKE p2.bezeichnung || '%' AND p2.semester < p.semester AND p2.status = "BE" AND p2.studium_id = p.studium_id
+                        )
+                        """
+            cursor.execute(query, (course_requiring_skill_mapped, course_providing_skill_mapped,))
+            results_without_course = cursor.fetchall()
+
+            #Collect the results if exist
+            if results_with_course and results_with_course[0][1] > 0:
+                average_grades_with_course.append([results_with_course[0][0], results_with_course[0][1]])
+            if results_without_course and results_without_course[0][1] > 0:
+                average_grades_without_course.append([results_without_course[0][0], results_without_course[0][1]])
+
+        grades_with_course = 0
+        grades_without_course = 0
+        count_with_course = 0
+        count_without_course = 0
+
+        #summarize average grades
+        for grades in average_grades_with_course:
+            grades_with_course += grades[0] * grades[1]
+            count_with_course += grades[1]
+        for grades in average_grades_without_course:
+            grades_without_course += grades[0] * grades[1]
+            count_without_course += grades[1]
+
+        #calculate edge weight
+        if count_with_course > 0 and count_without_course > 0:
+            edge_weight = grades_without_course / count_without_course - grades_with_course / count_with_course
+        else:
+            edge_weight = min
+
+        #Set age weight to zero if result is not representative
+        if edge_weight < min:
+            edge_weight = min
+
+        course_skill_edge_weights.append([edge_weight, course_providing_skill, skill, count_with_course, count_without_course])
+
+    conn.close()
+
+    return course_skill_edge_weights
+
+def getSkillCourseWeights(graph, database):
+    course_names_graph = list(graph.nodes())
+
+    skill_course_edge_weights = []
+
+    edges_to_check = []
+
+    skill_course_edges = getFilteredEdges(graph, "type", "type", "skill", "course")
+
+    conn = sqlite3.connect(database)
+    cursor = conn.cursor()
+
+    for edge in skill_course_edges:
+        skill = edge[0]
+        course_requiring_skill = edge[1]
+        course_requiring_skill_mapped = mapGraphToDB_courseName(course_requiring_skill)
+
+        query = """SELECT DISTINCT p.studium_id, p.semester
+                   FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
+                   WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Master' AND 
+                   p.status = "BE" AND ? LIKE p.bezeichnung || '%'
+                    """
+        cursor.execute(query, (course_requiring_skill_mapped,))
+        students_passed_course = cursor.fetchall()
+
+        skill_levels_for_passing = []
+        if students_passed_course:
+            for student in students_passed_course:
+                study_id = student[0]
+                semester = student[1]
+
+                query = """SELECT DISTINCT bezeichnung
+                           FROM pruefungsleistung
+                           WHERE studium_id = ? AND semester < ? AND status = "BE"
+                            """
+                cursor.execute(query, (study_id, semester,))
+                prior_passed_courses = cursor.fetchall()
+
+                skill_level = 0
+                if prior_passed_courses:
+                    for course in prior_passed_courses:
+                        course_name = mapDBtoGraph_courseName(course[0])
+                        course_name_full = getFullCourseName(course_name, course_names_graph)
+                        if graph.has_edge(course_name_full, skill):
+                            skill_level += graph[course_name_full][skill].get("weight")
+                        else:
+                            edges_to_check.append([course_name, course_name_full, skill])
+
+                skill_levels_for_passing.append(skill_level)
+
+        if skill_levels_for_passing:
+            average_skill_level_for_passing = sum(skill_levels_for_passing) / len(skill_levels_for_passing)
+        else:
+            average_skill_level_for_passing = 0
+        skill_course_edge_weights.append([average_skill_level_for_passing, skill, course_requiring_skill,
+                                         len(skill_levels_for_passing)])
+
+    return skill_course_edge_weights, edges_to_check

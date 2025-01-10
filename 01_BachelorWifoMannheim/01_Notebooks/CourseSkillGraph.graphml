@@ -593,15 +593,15 @@
     </node>
     <edge source="IS 201 Wirtschaftsinformatik I: Einführung und Grundlagen Business Informatics I: Introduction and Foundations" target="Human-Computer Interaction (HCI)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="IS 201 Wirtschaftsinformatik I: Einführung und Grundlagen Business Informatics I: Introduction and Foundations" target="Scientific Work (SW)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="IS 201 Wirtschaftsinformatik I: Einführung und Grundlagen Business Informatics I: Introduction and Foundations" target="Information Systems (IS)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="IS 202a Wirtschaftsinformatik IIa: Einführung in die Modellierung I: Logik Business Informatics IIa: Foundations of Modeling I: logic" target="Business Process Management (BPM)">
       <data key="d8">False</data>
@@ -699,10 +699,6 @@
       <data key="d8">False</data>
       <data key="d9">0.6392544378698227</data>
     </edge>
-    <edge source="CS 303 Praktische Informatik II Practical Computer Science II" target="CS 308 Softwaretechnik I Software Engineering I">
-      <data key="d10">1</data>
-      <data key="d8">False</data>
-    </edge>
     <edge source="CS 304 Programmierpraktikum I Programming Lab I" target="Foundations of Programming Languages (FPL)">
       <data key="d8">False</data>
       <data key="d9">0.641971704225838</data>
@@ -751,10 +747,6 @@
       <data key="d10">1</data>
       <data key="d8">False</data>
     </edge>
-    <edge source="CS 305 Programmierpraktikum II Programming Lab II" target="CS 308 Softwaretechnik I Software Engineering I">
-      <data key="d10">1</data>
-      <data key="d8">False</data>
-    </edge>
     <edge source="CS 306 Praktikum Software Engineering Software Engineering Practical" target="Software Engineering (SE)">
       <data key="d8">False</data>
       <data key="d9">0.199193299177434</data>
@@ -769,7 +761,7 @@
     </edge>
     <edge source="CS 306 Praktikum Software Engineering Software Engineering Practical" target="Human-Computer Interaction (HCI)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="CS 306 Praktikum Software Engineering Software Engineering Practical" target="Foundations of Programming Languages (FPL)">
       <data key="d8">False</data>
@@ -813,15 +805,15 @@
     </edge>
     <edge source="IS 405 Integrated Information Systems (Wifo) Integrated Information Systems (Wifo)" target="Business Process Management (BPM)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="IS 405 Integrated Information Systems (Wifo) Integrated Information Systems (Wifo)" target="Data Management (DM)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="IS 405 Integrated Information Systems (Wifo) Integrated Information Systems (Wifo)" target="Information Systems (IS)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="CS 405 Künstliche Intelligenz Artificial Intelligence" target="Artificial Intelligence (AI)">
       <data key="d8">False</data>
@@ -841,7 +833,7 @@
     </edge>
     <edge source="CS 408 Selected Topics in IT-Security Selected Topics in IT-Security" target="Security (SEC)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="CS 408 Selected Topics in IT-Security Selected Topics in IT-Security" target="Networking and Communication (NC)">
       <data key="d8">False</data>
@@ -857,11 +849,11 @@
     </edge>
     <edge source="CS 605 GPU-Programmierung GPU Programming" target="Parallel and Distributed Computing (PDC)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="CS 605 GPU-Programmierung GPU Programming" target="Architecture and Organization (AR)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="CS 414 Einführung in Data Science Introduction to Data Science" target="Artificial Intelligence (AI)">
       <data key="d8">False</data>
@@ -869,11 +861,11 @@
     </edge>
     <edge source="MAN 455 Digital Social Innovation Lab &quot;Young Academy&quot; Digital Social Innovation Lab &quot;Young Academy&quot;" target="Society, Ethics, and the Profession (SEP)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="MAN 455 Digital Social Innovation Lab &quot;Young Academy&quot; Digital Social Innovation Lab &quot;Young Academy&quot;" target="Human-Computer Interaction (HCI)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="Programmierkurs C/C++" target="Software Development Fundamentals (SDF)">
       <data key="d8">False</data>
@@ -885,83 +877,83 @@
     </edge>
     <edge source="SM 442 Bachelorseminar Prof. Stuckenschmidt Seminar" target="Scientific Work (SW)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="SM 443 Bachelorseminar Prof. Ponzetto Seminar" target="Scientific Work (SW)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="SM 444 Bachelorseminar Prof. Bizer Seminar" target="Scientific Work (SW)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="SM 445 Bachelorseminar Prof. Gemulla Seminar" target="Scientific Work (SW)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="SM 446 Bachelorseminar Prof. Moerkotte" target="Scientific Work (SW)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="SM 448 Bachelorseminar Prof. Krause Seminar" target="Scientific Work (SW)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="SM 449 Bachelorseminar Prof. Atkinson Seminar" target="Scientific Work (SW)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="SM 450 Bachelorseminar Prof. Armknecht Seminar" target="Scientific Work (SW)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="SM 451 Bachelorseminar Prof. Paulheim Seminar" target="Scientific Work (SW)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="SM 452 Bachelorseminar Prof. Heinzl Seminar" target="Scientific Work (SW)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="SM 453 Bachelorseminar Prof. Becker Seminar" target="Scientific Work (SW)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="SM 454 Bachelorseminar Dr. Rost Seminar" target="Scientific Work (SW)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="SM 456 Bachelorseminar Dr. Bartelt Seminar" target="Scientific Work (SW)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="SM 457 Seminar Prof. van der Aa Seminar on Process Analysis" target="Scientific Work (SW)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="SM 457 Seminar Prof. van der Aa Seminar on Process Analysis" target="Business Process Management (BPM)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="Grundlagen des externen Rechnungswesens" target="Accounting and Taxation (AAT)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="Internes Rechnungswesen" target="Accounting and Taxation (AAT)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="Finanzwirtschaft" target="Banking, Finance, and Insurance (FIN)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="Marketing" target="Marketing and Sales (MKT)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="Produktion" target="Operations Management (OPM)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="Management" target="Management (MAN)">
       <data key="d8">False</data>
@@ -973,11 +965,11 @@
     </edge>
     <edge source="Recht" target="Law (LAW)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="Grundlagen der Volkswirtschaftslehre" target="Economics (ECO)">
       <data key="d8">False</data>
-      <data key="d9">0.0</data>
+      <data key="d9">0.001</data>
     </edge>
     <edge source="Software Development Fundamentals (SDF)" target="IS 202a Wirtschaftsinformatik IIa: Einführung in die Modellierung I: Logik Business Informatics IIa: Foundations of Modeling I: logic">
       <data key="d8">False</data>
