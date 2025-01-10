@@ -6,6 +6,7 @@ import numpy as np
 from scipy.optimize import minimize
 
 
+
 skill_list = ["Software Development Fundamentals (SDF)", "Algorithmic Foundations (AL)",
               "Foundations of Programming Languages (FPL)", "Software Engineering (SE)",
               "Architecture and Organization (AR)", "Operating Systems (OS)", "Networking and Communication (NC)",
@@ -442,22 +443,21 @@ def getCourseRewards(graph, weights):
     return courseRewards
 
 
-def courseSuggestionGreedy(graph, min_semester_ECTS, max_semester_ECTS, max_ECTS, weights, startCycle, max_semester_amount):
+def courseSuggestionGreedy(graph, max_semester_ECTS, max_ECTS, weights, startCycle, max_semester_amount, courseRewards):
     current_ECTS = 0
     bestSemesterPlan = []
     graph_copy = graph.copy()
     rewardlessCourses = set(getRewardlessCourses(graph))
-    courseRewards = getCourseRewards(graph, weights)
     while current_ECTS < max_ECTS:
-        possibleSemesterPlans = getPossibleSemesterPlan_Efficient(graph_copy, min_semester_ECTS, max_semester_ECTS,
+        possibleSemesterPlans = getPossibleSemesterPlan_Efficient(graph_copy, 0, max_semester_ECTS,
                                                                   max_ECTS, startCycle)
         skill_level_graph = getSkillLevelsGraph(graph_copy)
         bestReward = -1
         candidates = []
         for possibleSemesterPlan in possibleSemesterPlans:
-            #reward = calculateRewardFunctionWithPenalty(possibleSemesterPlan[0], courseRewards, skill_level_graph)
-            reward = calculateRewardFunctionWithPenaltyFuture(graph, possibleSemesterPlan[0], courseRewards,
-                                                              skill_level_graph, startCycle, max_ECTS, min_semester_ECTS)
+            reward = calculateRewardFunctionWithPenalty(possibleSemesterPlan[0], courseRewards, skill_level_graph)
+            #reward = calculateRewardFunctionWithPenaltyFuture(graph, possibleSemesterPlan[0], courseRewards,
+            #                                                  skill_level_graph, startCycle, max_ECTS, 0)
             if reward > bestReward:
                 bestReward = reward
                 candidates = [possibleSemesterPlan]
@@ -507,6 +507,89 @@ def getRewardlessCourses(graph):
 
     return rewardlessCourses
 
+def objective(vars, courses, graph, course_rewards, start_cycle):
+    semester_amount = max(vars)
+    reward = 0
+    graph_copy = graph.copy()
+
+    for i in range(0, semester_amount + 1):
+        semester_courses_indices = [index for index, element in enumerate(vars) if element == i]
+        semester_courses = [courses[index] for index in semester_courses_indices]
+
+        skill_level_graph = getSkillLevelsGraph(graph_copy)
+
+        reward += calculateRewardFunctionWithPenalty(semester_courses, course_rewards, skill_level_graph)
+
+        takeCourses(graph_copy, semester_courses, start_cycle)
+        start_cycle = "FWS" if start_cycle == "SSS" else "SSS"
+
+    return -reward
+
+#def contraint_semesterAmount(vars, semester_amount):
+#    return 0 <= min(vars) and max(vars) < semester_amount
+
+def constraint_semesterECTS(vars, courses, graph, min_semester_ECTS, max_semester_ECTS):
+    semester_amount = max(vars)
+
+    for i in range(0, semester_amount + 1):
+        semester_courses_indices = [index for index, element in enumerate(vars) if element == i]
+        semester_courses = [courses[index] for index in semester_courses_indices]
+        courses_ECTS = [graph.nodes[course].get("ECTS") for course in semester_courses]
+        semester_ECTS = sum(courses_ECTS)
+        if not min_semester_ECTS <= semester_ECTS <= max_semester_ECTS:
+            return -1
+
+    return 1
+
+def constraint_valid(vars, courses, graph, start_cycle):
+    semester_amount = max(vars)
+    graph_copy = graph.copy()
+
+    for i in range(0, semester_amount + 1):
+        semester_courses_indices = [index for index, element in enumerate(vars) if element == i]
+        semester_courses = [courses[index] for index in semester_courses_indices]
+        for course in semester_courses:
+            available, parallelCourses = getCourseAvailability(graph_copy, course, [course], start_cycle)
+            if not available:
+                return -1
+            elif len(parallelCourses) > 1:
+                for parallelCourse in parallelCourses:
+                    if not parallelCourse in semester_courses:
+                        return -1
+
+        takeCourses(graph_copy, semester_courses, start_cycle)
+        start_cycle = "FWS" if start_cycle == "SSS" else "SSS"
+
+    return 1
+def twoStepAlgo(graph, min_semester_ECTS, max_semester_ECTS, max_ECTS, weights, startCycle, max_semester_amount):
+    courseRewards = getCourseRewards(graph, weights)
+    greedy_suggestion = courseSuggestionGreedy(graph, max_semester_ECTS, max_ECTS, weights, startCycle, max_semester_amount, courseRewards)
+    greedy_courses = []
+    greedy_order = []
+    semester_index = 0
+    for i in range(len(greedy_suggestion) - 1):
+        for course in greedy_suggestion[i][0]:
+            greedy_courses.append(course)
+            greedy_order.append(semester_index)
+        semester_index += 1
+
+    args = [greedy_courses, graph, courseRewards, startCycle]
+    bounds = [(0, max_semester_amount) for course in greedy_courses]
+    constraints = [
+        {'type': 'ineq', 'fun': constraint_semesterECTS, 'args': (greedy_courses, graph, min_semester_ECTS, max_semester_ECTS)},
+        {'type': 'ineq', 'fun': constraint_valid, 'args': (greedy_courses, graph, startCycle)},
+
+    ]
+    result = minimize(objective, greedy_order, args=args, method="SLSQP", bounds = bounds, constraints = constraints)
+
+    final_suggestion = []
+    for i in range(0, max_semester_amount):
+        semester_courses_indices = [index for index, element in enumerate(result) if element == i]
+        semester_courses = [greedy_courses[index] for index in semester_courses_indices]
+        final_suggestion.append(semester_courses)
+
+    return(final_suggestion)
+
 
 
 
@@ -551,7 +634,7 @@ weights = [5, 1,
     #takeCourses(G,[course],"SSS")
 #print(getPossibleSemesterPlan_Efficient(G, 12, 34, 180, "FWS"))
 #print(getCourseAvailability(G, "Marketing", ["Recht"], "FWS"))
-print(courseSuggestionGreedy(G, 0, 32, 180, weights, "FWS", 6))
+print(twoStepAlgo(G, 24, 34, 180, weights, "FWS", 6))
 #print(getAvailailableCourses_Efficient(G, 180, "FWS", 0))
 endzeit = time.time()
 ausfuehrungszeit = endzeit - startzeit
