@@ -3,6 +3,7 @@ import pandas as pd
 from itertools import combinations
 import time
 import numpy as np
+from scipy.optimize import minimize
 
 
 skill_list = ["Software Development Fundamentals (SDF)", "Algorithmic Foundations (AL)",

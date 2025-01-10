@@ -1,5 +1,4 @@
 import pandas as pd
-import graphCreation as gc
 import re
 import networkx as nx
 import sqlite3
@@ -402,33 +401,3 @@ def createPools(graph):
             elif node.startswith("IS "):
                 graph.nodes[node]["pool"] = "Information Systems"
     return graph
-
-courses = []
-for i in range(0,54):
-    path = "../03_Courses/Course" + str(i) + ".xlsx"
-    df = pd.read_excel(path, dtype=str).fillna('')
-    courses.append(df)
-
-G = nx.DiGraph()
-
-course_nodes = gc.getCourseNodes(courses)
-knowledge_nodes = pd.read_excel("../04_Graph/knowledgeAreas.xlsx").values.tolist()
-edges_df = pd.read_excel("../04_Graph/edges.xlsx")
-edges = edges_df.values.tolist()
-
-for node in course_nodes:
-    G.add_node(node[0], ECTS=node[1], offering_cycle=node[2], color="grey", type="course", active = False)
-
-#Create Skill Nodes
-for i in range(len(knowledge_nodes)):
-    if i <= 16:
-        G.add_node(knowledge_nodes[i][0], color="blue", type="skill", active = False)
-    elif i > 16 and i <= 22:
-        G.add_node(knowledge_nodes[i][0], color="green", type="skill", active = False)
-    else:
-        G.add_node(knowledge_nodes[i][0], color="brown", type="skill", active = False)
-
-for edge in edges:
-   G.add_edge(edge[0], edge[1], active = False)
-
-additional_edges, additional_nodes = complete_edges(courses, edges_df)
