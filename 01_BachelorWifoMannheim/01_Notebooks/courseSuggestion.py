@@ -1,9 +1,11 @@
+import copy
+
 import networkx as nx
 import pandas as pd
 from itertools import combinations
 import time
 import numpy as np
-from scipy.optimize import minimize
+from pyomo.environ import *
 
 
 
@@ -25,6 +27,7 @@ pool_ECTS = [24, 57, 25, 12, 5, 4, 5, 12, 30, 6]
 
 required_skill_levels = {}
 
+
 def initialize(graph):
     courses = [course for course in graph.nodes() if graph.nodes[course].get("type") == "course"]
     for course in courses:
@@ -35,6 +38,15 @@ def initialize(graph):
                 if course not in required_skill_levels:
                     required_skill_levels[course] = {}
                 required_skill_levels[course][potential_skill] = graph.edges[edge].get("weight")
+
+def checkExclusive(graph, courses):
+    excluded_courses = {
+        edge[0]
+        for course in courses
+        for edge in graph.in_edges(course, data=True)
+        if str(edge[2].get("weight")) in {"-1", "3"} and edge[2].get("type") == "course"
+    }
+    return not any(course in excluded_courses for course in courses)
 
 
 def getCourseAvailability(graph, course, checkedNodes, cycle):
@@ -56,7 +68,7 @@ def getCourseAvailability(graph, course, checkedNodes, cycle):
             elif graph[node][course].get("weight") == 2 and graph.nodes[node].get("active") == False:
                 if not node in checkedNodes:
                     checkedNodes.append(node)
-                    available, tmp = getCourseAvailability(graph, node, checkedNodes)
+                    available, tmp = getCourseAvailability(graph, node, checkedNodes, cycle)
                     if not available:
                         break
 
@@ -65,18 +77,6 @@ def getCourseAvailability(graph, course, checkedNodes, cycle):
                 break
 
     return available, checkedNodes
-
-def checkSkillLevel(graph, courses):
-    skill_levels = getSkillLevelsGraph(graph)
-    for course in courses:
-        incoming_edges = graph.in_edges(course)
-        for edge in incoming_edges:
-            potential_skill = edge[0]
-            if potential_skill in skill_list:
-                if skill_levels[skill_list.index(potential_skill)] < graph.edges[edge].get("weight"):
-                    return False
-
-    return True
 
 def checkSkillLevel_Efficient(skill_levels, courses):
     for course in courses:
@@ -88,35 +88,8 @@ def checkSkillLevel_Efficient(skill_levels, courses):
 
     return True
 
-def checkEnoughECTS(graph, courses, max_ECTS, min_semester_ECTS):
-    active_courses = [course for course in graph.nodes() if graph.nodes[course].get("active") == True and
-                        graph.nodes[course].get("type") == "course"]
-    active_courses.extend(courses)
-    current_ECTS = 0
-    pool_ECTS_left_copy = pool_ECTS.copy()
-    for course in active_courses:
-        course_ECTS = int(graph.nodes[course].get("ECTS"))
-        current_ECTS += course_ECTS
-        pool_raw = graph.nodes[course].get("pool")
-        pools = [pool.strip() for pool in pool_raw.split("|")]
-        if len(pools) > 1:
-            for pool in pools:
-                pool_index = pool_names.index(pool)
-                if pool_ECTS_left_copy[pool_index] > 0:
-                    pool_ECTS_left_copy[pool_index] -= course_ECTS
-                    if pool_ECTS_left_copy[pool_index] < 0:
-                        pool_ECTS_left_copy[pool_index] = 0
-                    break
-        else:
-            pool_index = pool_names.index(pools[0])
-            pool_ECTS_left_copy[pool_index] -= course_ECTS
-            if pool_ECTS_left_copy[pool_index] < 0:
-                pool_ECTS_left_copy[pool_index] = 0
 
-    ECTS_left = sum(pool_ECTS_left_copy)
-    return max_ECTS - current_ECTS >= ECTS_left and min_semester_ECTS <= ECTS_left
-
-def checkEnoughECTS_Efficient(graph, current_ECTS, pool_ECTS_left, courses, max_ECTS, min_semester_ECTS):
+def checkEnoughECTS_Efficient(graph, current_ECTS, pool_ECTS_left, courses, max_ECTS):
     pool_ECTS_left_copy = pool_ECTS_left.copy()
     current_ECTS_copy = current_ECTS
     for course in courses:
@@ -138,9 +111,31 @@ def checkEnoughECTS_Efficient(graph, current_ECTS, pool_ECTS_left, courses, max_
             if pool_ECTS_left_copy[pool_index] < 0:
                 pool_ECTS_left_copy[pool_index] = 0
 
-    #print(pool_ECTS_left)
     ECTS_left = sum(pool_ECTS_left_copy)
-    return max_ECTS - current_ECTS_copy >= ECTS_left and min_semester_ECTS <= ECTS_left
+    return max_ECTS - current_ECTS_copy >= ECTS_left
+
+def checkEnoughECTS_Efficient_new(graph, current_ECTS, pool_ECTS_left, courses, max_ECTS):
+    pool_ECTS_left_copy = pool_ECTS_left.copy()
+    current_ECTS_copy = current_ECTS
+
+    for course in courses:
+        course_ECTS = int(graph.nodes[course].get("ECTS"))
+        current_ECTS_copy += course_ECTS
+        pool_raw = graph.nodes[course].get("pool")
+        pools = [pool.strip() for pool in pool_raw.split("|")]
+        if len(pools) > 1:
+            for pool in pools:
+                pool_index = pool_names.index(pool)
+                if pool_ECTS_left_copy[pool_index] > 0:
+                    pool_ECTS_left_copy[pool_index] = max(0, pool_ECTS_left_copy[pool_index] - course_ECTS)
+                    break
+        else:
+            pool_index = pool_names.index(pools[0])
+            pool_ECTS_left_copy[pool_index] = max(0, pool_ECTS_left_copy[pool_index] - course_ECTS)
+
+    ECTS_left = sum(pool_ECTS_left_copy)
+    return max_ECTS - current_ECTS_copy >= ECTS_left
+
 
 def getCurrentECTSLeft(graph):
     active_courses = [course for course in graph.nodes() if graph.nodes[course].get("active") == True and
@@ -169,37 +164,47 @@ def getCurrentECTSLeft(graph):
     return pool_ECTS_left, current_ECTS
 
 
-def getAvailailableCourses(graph, max_ECTS, cycle, min_semester_ECTS):
-    available_courses = []
-    inactive_courses = [course for course in graph.nodes() if graph.nodes[course].get("active") == False and
-                        graph.nodes[course].get("type") == "course"]
-    for course in inactive_courses:
-        available, parallelCourses = getCourseAvailability(graph, course, [course], cycle)
-        if available and checkSkillLevel(graph, parallelCourses) and checkEnoughECTS(graph, parallelCourses, max_ECTS,
-                                                                                     min_semester_ECTS):
-            available_courses.append(parallelCourses)
 
-    return available_courses
-
-def getAvailailableCourses_Efficient(graph, max_ECTS, cycle, min_semester_ECTS):
+def getAvailailableCourses_Efficient(graph, max_ECTS, cycle, courses =[]):
     available_courses = []
-    inactive_courses = [course for course in graph.nodes() if graph.nodes[course].get("active") == False and
-                        graph.nodes[course].get("type") == "course"]
-    skill_levels = getSkillLevelsGraph(graph)
+    if courses:
+        inactive_courses = [course for course in graph.nodes() if graph.nodes[course].get("active") == False and
+                            graph.nodes[course].get("type") == "course" and course in courses]
+    else:
+        inactive_courses = [course for course in graph.nodes() if graph.nodes[course].get("active") == False and
+                            graph.nodes[course].get("type") == "course"]
+    #skill_levels = getSkillLevelsGraph(graph)
     pool_ECTS_left, current_ECTS = getCurrentECTSLeft(graph)
     for course in inactive_courses:
         available, parallelCourses = getCourseAvailability(graph, course, [course], cycle)
-        if available and checkEnoughECTS_Efficient(graph, current_ECTS, pool_ECTS_left, parallelCourses, max_ECTS,
-                                                   min_semester_ECTS): #and checkSkillLevel_Efficient(skill_levels, parallelCourses)
+        if available and checkEnoughECTS_Efficient(graph, current_ECTS, pool_ECTS_left, parallelCourses, max_ECTS):
             available_courses.append(parallelCourses)
-    return available_courses
+    return available_courses, pool_ECTS_left, current_ECTS
 
-def getPossibleSemesterPlan(graph, min_semester_ECTS, max_semester_ECTS, max_ECTS, cycle):
-    availableCourses = getAvailailableCourses(graph, max_ECTS, cycle)
+
+def getPossibleSemesterPlan_Efficient(graph, max_semester_ECTS, max_ECTS, cycle, courses =[]):
+    if courses:
+        availableCourses, pool_ECTS_left, current_ECTS = getAvailailableCourses_Efficient(graph, max_ECTS, cycle, courses)
+    else:
+        availableCourses, pool_ECTS_left, current_ECTS = getAvailailableCourses_Efficient(graph, max_ECTS, cycle)
     possibleSemesterPlans = []
 
-    for number_of_courses in range(1, 8):
-        startzeit = time.time()
+    #Get maximum size of courses in combination that can be in defined ECTS range
+    min_comb_ECTS = 0
+    available_courses_ECTS = []
+    for courses in availableCourses:
+        courses_ECTS = 0
+        for course in courses:
+            courses_ECTS += int(graph.nodes[course].get("ECTS"))
+        available_courses_ECTS.append(courses_ECTS)
+    max_course_amount = 0
+    while min_comb_ECTS < max_semester_ECTS and available_courses_ECTS:
+        min_ECTS = min(available_courses_ECTS)
+        min_comb_ECTS += int(min_ECTS)
+        available_courses_ECTS.remove(min_ECTS)
+        max_course_amount += 1
+
+    for number_of_courses in range(1, max_course_amount):
         for possibleSemesterPlan in combinations(availableCourses, number_of_courses):
             ECTS = 0
             clean_list = []
@@ -207,28 +212,61 @@ def getPossibleSemesterPlan(graph, min_semester_ECTS, max_semester_ECTS, max_ECT
                 for course in courseCollection:
                     ECTS += int(graph.nodes[course].get("ECTS"))
                     clean_list.append(course)
-            if min_semester_ECTS <= ECTS <= max_semester_ECTS and checkEnoughECTS(graph, clean_list, max_ECTS,
-                                                                                  min_semester_ECTS):
-                possibleSemesterPlans.append(clean_list)
-    return possibleSemesterPlans
-def getPossibleSemesterPlan_Efficient(graph, min_semester_ECTS, max_semester_ECTS, max_ECTS, cycle):
-    availableCourses = getAvailailableCourses_Efficient(graph, max_ECTS, cycle, min_semester_ECTS)
-    possibleSemesterPlans = []
-    pool_ECTS_left, current_ECTS = getCurrentECTSLeft(graph)
-
-    for number_of_courses in range(1, 8):
-        for possibleSemesterPlan in combinations(availableCourses, number_of_courses):
-            ECTS = 0
-            clean_list = []
-            for courseCollection in possibleSemesterPlan:
-                for course in courseCollection:
-                    ECTS += int(graph.nodes[course].get("ECTS"))
-                    clean_list.append(course)
-            if min_semester_ECTS <= ECTS <= max_semester_ECTS and \
-                    checkEnoughECTS_Efficient(graph, current_ECTS, pool_ECTS_left, clean_list, max_ECTS,
-                                              min_semester_ECTS) and clean_list:
+            if  ECTS <= max_semester_ECTS and checkExclusive(graph, clean_list) and \
+                    checkEnoughECTS_Efficient(graph, current_ECTS, pool_ECTS_left, clean_list, max_ECTS) and clean_list:
                 possibleSemesterPlans.append([clean_list, ECTS])
     return possibleSemesterPlans
+
+def getPossibleSemesterPlan_Efficient_new(graph, max_semester_ECTS, max_ECTS, cycle, courses =[]):
+    if courses:
+        availableCourses, pool_ECTS_left, current_ECTS = getAvailailableCourses_Efficient(graph, max_ECTS, cycle, courses)
+    else:
+        availableCourses, pool_ECTS_left, current_ECTS = getAvailailableCourses_Efficient(graph, max_ECTS, cycle)
+    possibleSemesterPlans = []
+
+    #Get maximum size of courses in combination that can be in defined ECTS range
+    min_comb_ECTS = 0
+    available_courses_ECTS = []
+    for courses in availableCourses:
+        courses_ECTS = 0
+        for course in courses:
+            courses_ECTS += int(graph.nodes[course].get("ECTS"))
+        available_courses_ECTS.append(courses_ECTS)
+    max_course_amount = 0
+    while min_comb_ECTS < max_semester_ECTS and available_courses_ECTS:
+        min_ECTS = min(available_courses_ECTS)
+        min_comb_ECTS += int(min_ECTS)
+        available_courses_ECTS.remove(min_ECTS)
+        max_course_amount += 1
+
+    possibleSemesterPlans = list(generate_valid_combinations(
+        graph, availableCourses, 6, max_semester_ECTS, current_ECTS, pool_ECTS_left, max_ECTS
+    ))
+    return possibleSemesterPlans
+
+
+def generate_valid_combinations(graph, available_courses, max_course_amount, max_semester_ECTS, current_ECTS,
+                                pool_ECTS_left, max_ECTS):
+    def condition(combination):
+        total_ects = 0
+        for course in combination:
+            total_ects += int(graph.nodes[course].get("ECTS"))
+            if total_ects > max_semester_ECTS:
+                return False
+        return (
+                checkExclusive(graph, combination)
+                and checkEnoughECTS_Efficient(graph, current_ECTS, pool_ECTS_left, combination, max_ECTS)
+        )
+
+    for num_courses in range(1, max_course_amount + 1):
+        for combination in combinations(available_courses, num_courses):
+            clean_list = []
+            for courses in combination:
+                for course in courses:
+                    clean_list.append(course)
+
+            if condition(clean_list):
+                yield [list(clean_list), sum(int(graph.nodes[course].get("ECTS")) for course in clean_list)]
 
 def getSkillLevelsGraph(graph):
     active_courses = [course for course in graph.nodes() if graph.nodes[course].get("active") == True and
@@ -295,84 +333,29 @@ def activatePrerequisiteNodes(graph, course):
 
     return graph
 
-def calculateRewardFunctionGraph(graph, weights):
-    skill_level = getSkillLevelsGraph(graph)
-    reward = 0
-    for i in range(0, len(skill_level)):
-        reward += skill_level[i] * weights[i]
 
-    return reward
 
-def calculateRewardFunctionCourse(graph, weights, courses):
-    skill_level = getSkillLevelsCourse(graph, courses)
-    reward = 0
-    for i in range(0, len(skill_level)):
-        reward += skill_level[i] * weights[i]
+def getPenalty(course, skill_level_graph):
+    if course not in required_skill_levels:
+        return 1
 
-    return reward
+    required_skills = required_skill_levels[course]
+    required_skill = sum(required_skills.values())
+    actual_skill = sum(
+        min(skill_level_graph[skill_list.index(sub_key)], value)
+        for sub_key, value in required_skills.items()
+    )
+
+    return min(1, actual_skill / required_skill) if required_skill > 0 else 1
 
 def calculateRewardFunctionWithPenalty(courses, course_rewards, skill_level_graph):
     if not courses:
         return 0
-    reward = 0
-    for i in range(0, len(courses)):
-        penalty = 1
-        if courses[i] in required_skill_levels:
-            required_skill = 0
-            actual_skill = 0
-            for sub_key, value in required_skill_levels[courses[i]].items():
-                required_skill += value
-                actual_skill += skill_level_graph[skill_list.index(sub_key)]
-            if required_skill != 0:
-                penalty = min(1, actual_skill / required_skill)
-        reward += penalty * course_rewards[courses[i]]
 
-    return reward
-
-def calculateRewardFunctionWithPenaltyFuture(graph, courses, course_rewards, skill_level_graph, cycle, max_ECTS, min_semester_ECTS):
-    if not courses:
-        return 0
-    reward = 0
-    for i in range(0, len(courses)):
-        penalty = 1
-        if courses[i] in required_skill_levels:
-            required_skill = 0
-            actual_skill = 0
-            for sub_key, value in required_skill_levels[courses[i]].items():
-                required_skill += value
-                actual_skill += skill_level_graph[skill_list.index(sub_key)]
-            if required_skill != 0:
-                penalty = min(1, actual_skill / required_skill)
-        reward += penalty * course_rewards[courses[i]]
-
-        graph_copy_tmp = graph.copy()
-        takeCourses(graph_copy_tmp, courses, cycle)
-        next_cycle = "FWS" if cycle == "SSS" else "SSS"
-        future_courses_raw = getAvailailableCourses_Efficient(graph_copy_tmp, max_ECTS, next_cycle, min_semester_ECTS)
-        future_courses = []
-        for course_collection in future_courses_raw:
-            for course in course_collection:
-                future_courses.append(course)
-        future_reward = calculateRewardFunctionWithPenalty(future_courses, course_rewards, skill_level_graph) / len(future_courses)
-
-    return reward + future_reward
-def getBestSemesterPlan(graph, min_semester_ECTS, max_semester_ECTS, max_ECTS, weights):
-    possibleSemesterPlans = getPossibleSemesterPlan_Efficient(graph, min_semester_ECTS, max_semester_ECTS, max_ECTS)
-
-    currentReward = calculateRewardFunctionGraph(graph, weights)
-    bestReward = currentReward
-    bestSemesterPlan = []
-
-    for semesterPlan in possibleSemesterPlans:
-        tmp = graph.copy()
-        takeCourses(tmp,semesterPlan)
-        reward = calculateRewardFunctionGraph(tmp, weights)
-        if reward > bestReward:
-            bestReward = reward
-            bestSemesterPlan = semesterPlan
-
-    return bestSemesterPlan
-
+    return sum(
+        getPenalty(course, skill_level_graph) * course_rewards[course]
+        for course in courses
+    )
 
 
 def takeCourses(graph, courses, cycle):
@@ -385,43 +368,167 @@ def takeCourses(graph, courses, cycle):
         graph = activatePrerequisiteNodes(graph, course)
     return graph
 
+def getSemesterValidPartial(graph, semester, courses, cycle):
+    valid_swap = True
+    for course in courses:
+        available, parallelCourses = getCourseAvailability(graph, course, [course], cycle)
+        if not available:
+            valid_swap = False
+        elif len(parallelCourses) > 1:
+            for parallelCourse in parallelCourses:
+                if not (parallelCourse in semester or parallelCourse in courses):
+                    valid_swap = False
+    return valid_swap
 
-def getCourseSuggestion(graph, min_semester_ECTS, max_semester_ECTS, max_ECTS, weights):
-    possibleCourseOfStudies = []
+def getSemesterValid(graph, semester, cycle):
+    valid_swap = True
+    for course in semester:
+        available, parallelCourses = getCourseAvailability(graph, course, [course], cycle)
+        if not available:
+            valid_swap = False
+            break
+        elif len(parallelCourses) > 1:
+            for parallelCourse in parallelCourses:
+                if not (parallelCourse in semester):
+                    valid_swap = False
+                    break
+    return valid_swap
 
-    courseSuggestions = getPossibleSemesterPlan_Efficient(graph, min_semester_ECTS, max_semester_ECTS, max_ECTS)
-    for courseSuggestion in courseSuggestions:
+def getSwapPossibilities(graph, start, semester_plan, max_semester_ECTS, course_ECTS,
+                         step_size, start_cycle):
+    swap_possibilities = []
+    for j in range(start+step_size, len(semester_plan), step_size):
+        if semester_plan[j][1] + int(course_ECTS) <= max_semester_ECTS:
+            swap_possibilities.append([j, None])
+        else:
+            needed_ECTS =  abs(max_semester_ECTS - semester_plan[j][1] - int(course_ECTS))
+            swap_ECTS = 0
+            course_amount = 1
+            swap_course_pool = copy.deepcopy(semester_plan[j][0])
+            if swap_course_pool:
+                while swap_ECTS < needed_ECTS and swap_course_pool:
+                    min_ECTS_course = min(swap_course_pool, key=lambda tmp: int(graph.nodes[tmp].get("ECTS")))
+                    swap_ECTS += int(graph.nodes[min_ECTS_course].get("ECTS"))
+                    swap_course_pool.remove(min_ECTS_course)
+                    course_amount += 1
+                if swap_ECTS >= needed_ECTS:
+                    for k in range(1, course_amount):
+                        for possible_swap_comb in combinations(semester_plan[j][0], k):
+                            if getSemesterValidPartial(graph, semester_plan[start], possible_swap_comb, start_cycle):
+                                lost_ECTS = sum(int(graph.nodes[swap_course].get("ECTS")) for swap_course in possible_swap_comb)
+                                if semester_plan[j][1] - lost_ECTS + int(course_ECTS) <= max_semester_ECTS and \
+                                    semester_plan[start][1] - int(course_ECTS) + lost_ECTS <= max_semester_ECTS:
+                                    swap_possibilities.append([j, possible_swap_comb])
+    return swap_possibilities
+
+def getParallelCourses(graph, courses):
+    parallel_courses = []
+    courses_to_skip = set()
+    for course in courses:
+        if not course in courses_to_skip:
+            potential_parallel_courses = [course]
+            incoming_edges = graph.in_edges(course)
+            outgoing_edges = graph.out_edges(course)
+            for edge in incoming_edges:
+                if graph.edges[edge].get("weight") == 2 and (course, edge[0]) in outgoing_edges:
+                    if graph.edges[course, edge[0]].get("weight") == 2:
+                        potential_parallel_courses.append(edge[0])
+            if len(potential_parallel_courses) > 1:
+                parallel_courses.append(potential_parallel_courses)
+                courses_to_skip.update(potential_parallel_courses)
+            else:
+                parallel_courses.append([course])
+    return parallel_courses
+def getParallelCycle(graph, courses):
+    cycle = None
+    for course in courses:
+        cycle = graph.nodes[course].get("offering_cycle")
+        if not cycle == "Continously":
+            break
+    return cycle
+
+def optimizeCourseSuggestion(graph, max_semester_ECTS, max_ECTS, course_rewards, semester_plan,
+                             start_cycle, max_semester_amount, stop_criterion):
+
+    optimized_plan = copy.deepcopy(semester_plan)
+
+    loops = 0
+    while True:
+        old_plan_reward = getPlanReward(graph, optimized_plan, start_cycle, course_rewards)[0]
         graph_copy = graph.copy()
-        takeCourses(graph_copy, courseSuggestion[0])
-        reward = calculateRewardFunctionCourse(graph, weights, courseSuggestion[0])
-        possibleCourseOfStudies.append([courseSuggestion[0], graph_copy, reward, courseSuggestion[1]])
+        cycle = start_cycle
+        for i in range(len(optimized_plan) - 1):
+            skill_level = getSkillLevelsGraph(graph_copy)
+            courses_with_penalty = []
+            parallel_courses = getParallelCourses(graph_copy, optimized_plan[i][0])
 
-    finished = False
-    while not finished:
-        finished = True
-        for possibleCourseOfStudy in possibleCourseOfStudies[:]:
-            if possibleCourseOfStudy[3] < max_ECTS:
-                courseSuggestions = getPossibleSemesterPlan_Efficient(possibleCourseOfStudy[1], min_semester_ECTS,
-                                                                      max_semester_ECTS, max_ECTS)
-                if courseSuggestion:
-                    finished = False
-                    for courseSuggestion in courseSuggestions:
-                        graph_copy = possibleCourseOfStudy[1].copy()
-                        takeCourses(graph_copy, courseSuggestion[0])
-                        reward = calculateRewardFunctionCourse(graph, weights, courseSuggestion[0])
-                        possibleCourseOfStudies.append([possibleCourseOfStudy[0].append(courseSuggestion[0]), graph_copy,
-                                                       possibleCourseOfStudy[2] + reward,
-                                                       possibleCourseOfStudy[2] + courseSuggestion[1]])
-                    possibleCourseOfStudies.remove(possibleCourseOfStudy)
+            for courses in parallel_courses:
+                potential = 0
+                for course in courses:
+                    potential += (1 - getPenalty(course, skill_level)) * course_rewards[course]
+                potential /= len(courses)
+                if potential > 0:
+                    courses_with_penalty.append([courses, potential])
+            courses_with_penalty_sorted = sorted(courses_with_penalty, key=lambda x: x[1], reverse=True)
+            for course_penalty in courses_with_penalty_sorted:
+                courses = course_penalty[0]
+                courses_ECTS = sum(int(graph.nodes[tmp].get("ECTS")) for tmp in courses)
+                courses_cycle = getParallelCycle(graph_copy, courses)
+                if courses_cycle == "Continuously":
+                    swap_possibilities = getSwapPossibilities(graph_copy, i, optimized_plan,
+                                                              max_semester_ECTS, courses_ECTS, 1, courses_cycle)
+                else:
+                    swap_possibilities = getSwapPossibilities(graph_copy, i, optimized_plan,
+                                                              max_semester_ECTS, courses_ECTS, 2, courses_cycle)
 
-    bestCourseOfStudy = []
-    bestReward = 0
-    for possibleCourseOfStudy in possibleCourseOfStudies:
-        if possibleCourseOfStudy[2] > bestReward:
-            bestCourseOfStudy = possibleCourseOfStudy
-            bestReward = possibleCourseOfStudy[2]
+                best_swap = []
+                best_swap_reward = -1
+                for swap_possibility in swap_possibilities:
+                    graph_copy_swap = graph_copy.copy()
+                    swap_semester = swap_possibility[0]
+                    swap_cycle = cycle
+                    old_reward = getPlanReward(graph_copy, optimized_plan[i:swap_semester+1], swap_cycle, course_rewards)[0]
+                    possible_new_plan = copy.deepcopy(optimized_plan)
+                    possible_new_plan[i][0] = [tmp for tmp in possible_new_plan[i][0] if tmp not in courses]
+                    possible_new_plan[swap_semester][0].extend(courses)
+                    if swap_possibility[1] is not None:
+                        possible_new_plan[i][0].extend(swap_possibility[1])
+                        possible_new_plan[swap_semester][0] = [tmp for tmp in possible_new_plan[swap_semester][0] if tmp not in swap_possibility[1]]
+                    new_reward = calculateRewardFunctionWithPenalty(possible_new_plan[i][0], course_rewards, skill_level)
+                    for j in range(i+1, swap_semester+1):
+                        takeCourses(graph_copy_swap, possible_new_plan[j-1][0], swap_cycle)
+                        swap_cycle = "FWS" if swap_cycle == "SSS" else "SSS"
+                        if getSemesterValid(graph_copy_swap, possible_new_plan[j][0], swap_cycle):
+                            skill_level_swap = getSkillLevelsGraph(graph_copy_swap)
+                            new_reward += calculateRewardFunctionWithPenalty(possible_new_plan[j][0], course_rewards, skill_level_swap)
+                        else:
+                            new_reward = -1
+                            break
+                    if new_reward - old_reward > best_swap_reward:
+                        best_swap = swap_possibility
+                        best_swap_reward = new_reward - old_reward
+                if best_swap_reward > 0:
+                    #print("Swapped: " + str(courses) + "with " + str(best_swap))
+                    optimized_plan[i][0] = [course for course in optimized_plan[i][0] if course not in courses]
+                    optimized_plan[best_swap[0]][0].extend(courses)
+                    if best_swap[1] is not None:
+                        optimized_plan[i][0].extend(best_swap[1])
+                        optimized_plan[best_swap[0]][0] = [tmp for tmp in optimized_plan[best_swap[0]][0] if
+                                                               tmp not in best_swap[1]]
 
-    return bestCourseOfStudy
+                    optimized_plan[i][1] = sum(int(graph.nodes[tmp].get("ECTS")) for tmp in optimized_plan[i][0])
+                    optimized_plan[best_swap[0]][1] = sum(int(graph.nodes[tmp].get("ECTS")) for tmp in optimized_plan[best_swap[0]][0])
+
+            takeCourses(graph_copy, optimized_plan[i][0], cycle)
+            cycle = "FWS" if cycle == "SSS" else "SSS"
+
+        new_plan_reward = getPlanReward(graph, optimized_plan, start_cycle, course_rewards)[0]
+
+        if new_plan_reward - old_plan_reward < stop_criterion:
+            break
+
+
+    return(optimized_plan)
 
 def getCourseRewards(graph, weights):
     courseRewards = {}
@@ -442,22 +549,37 @@ def getCourseRewards(graph, weights):
 
     return courseRewards
 
-
-def courseSuggestionGreedy(graph, max_semester_ECTS, max_ECTS, weights, startCycle, max_semester_amount, courseRewards):
+def courseSuggestionGreedy(graph, max_semester_ECTS, max_ECTS, startCycle, courseRewards):
     current_ECTS = 0
     bestSemesterPlan = []
     graph_copy = graph.copy()
-    rewardlessCourses = set(getRewardlessCourses(graph))
     while current_ECTS < max_ECTS:
-        possibleSemesterPlans = getPossibleSemesterPlan_Efficient(graph_copy, 0, max_semester_ECTS,
+        bestCandidate = getBestSemesterPlan(graph_copy, max_semester_ECTS, max_ECTS, startCycle, courseRewards)
+
+        bestSemesterPlan.append(bestCandidate)
+        current_ECTS += bestCandidate[1]
+        takeCourses(graph_copy, bestCandidate[0], startCycle)
+
+        if startCycle == "FWS":
+            startCycle = "SSS"
+        else:
+            startCycle = "FWS"
+
+    return bestSemesterPlan, current_ECTS
+def courseSuggestionGreedy_old(graph, max_semester_ECTS, max_ECTS, startCycle, courseRewards):
+    current_ECTS = 0
+    bestSemesterPlan = []
+    graph_copy = graph.copy()
+    rewardlessCourses = set(getRewardlessCourses(graph_copy))
+    while current_ECTS < max_ECTS:
+        possibleSemesterPlans = getPossibleSemesterPlan_Efficient(graph_copy, max_semester_ECTS,
                                                                   max_ECTS, startCycle)
         skill_level_graph = getSkillLevelsGraph(graph_copy)
         bestReward = -1
         candidates = []
         for possibleSemesterPlan in possibleSemesterPlans:
             reward = calculateRewardFunctionWithPenalty(possibleSemesterPlan[0], courseRewards, skill_level_graph)
-            #reward = calculateRewardFunctionWithPenaltyFuture(graph, possibleSemesterPlan[0], courseRewards,
-            #                                                  skill_level_graph, startCycle, max_ECTS, 0)
+
             if reward > bestReward:
                 bestReward = reward
                 candidates = [possibleSemesterPlan]
@@ -507,88 +629,89 @@ def getRewardlessCourses(graph):
 
     return rewardlessCourses
 
-def objective(vars, courses, graph, course_rewards, start_cycle):
-    semester_amount = max(vars)
-    reward = 0
-    graph_copy = graph.copy()
-
-    for i in range(0, semester_amount + 1):
-        semester_courses_indices = [index for index, element in enumerate(vars) if element == i]
-        semester_courses = [courses[index] for index in semester_courses_indices]
-
-        skill_level_graph = getSkillLevelsGraph(graph_copy)
-
-        reward += calculateRewardFunctionWithPenalty(semester_courses, course_rewards, skill_level_graph)
-
-        takeCourses(graph_copy, semester_courses, start_cycle)
-        start_cycle = "FWS" if start_cycle == "SSS" else "SSS"
-
-    return -reward
-
-#def contraint_semesterAmount(vars, semester_amount):
-#    return 0 <= min(vars) and max(vars) < semester_amount
-
-def constraint_semesterECTS(vars, courses, graph, min_semester_ECTS, max_semester_ECTS):
-    semester_amount = max(vars)
-
-    for i in range(0, semester_amount + 1):
-        semester_courses_indices = [index for index, element in enumerate(vars) if element == i]
-        semester_courses = [courses[index] for index in semester_courses_indices]
-        courses_ECTS = [graph.nodes[course].get("ECTS") for course in semester_courses]
-        semester_ECTS = sum(courses_ECTS)
-        if not min_semester_ECTS <= semester_ECTS <= max_semester_ECTS:
-            return -1
-
-    return 1
-
-def constraint_valid(vars, courses, graph, start_cycle):
-    semester_amount = max(vars)
-    graph_copy = graph.copy()
-
-    for i in range(0, semester_amount + 1):
-        semester_courses_indices = [index for index, element in enumerate(vars) if element == i]
-        semester_courses = [courses[index] for index in semester_courses_indices]
-        for course in semester_courses:
-            available, parallelCourses = getCourseAvailability(graph_copy, course, [course], start_cycle)
-            if not available:
-                return -1
-            elif len(parallelCourses) > 1:
-                for parallelCourse in parallelCourses:
-                    if not parallelCourse in semester_courses:
-                        return -1
-
-        takeCourses(graph_copy, semester_courses, start_cycle)
-        start_cycle = "FWS" if start_cycle == "SSS" else "SSS"
-
-    return 1
-def twoStepAlgo(graph, min_semester_ECTS, max_semester_ECTS, max_ECTS, weights, startCycle, max_semester_amount):
+def twoStepAlgo(graph, max_semester_ECTS, max_ECTS, weights, startCycle, max_semester_amount, stop_criterion):
+    start_cycle_working_copy = startCycle
     courseRewards = getCourseRewards(graph, weights)
-    greedy_suggestion = courseSuggestionGreedy(graph, max_semester_ECTS, max_ECTS, weights, startCycle, max_semester_amount, courseRewards)
+    greedy_suggestion = courseSuggestionGreedy(graph, max_semester_ECTS, max_ECTS, start_cycle_working_copy, courseRewards)
     greedy_courses = []
     greedy_order = []
     semester_index = 0
-    for i in range(len(greedy_suggestion) - 1):
-        for course in greedy_suggestion[i][0]:
+    for semester in greedy_suggestion[0]:
+        for course in semester[0]:
             greedy_courses.append(course)
             greedy_order.append(semester_index)
         semester_index += 1
 
-    args = [greedy_courses, graph, courseRewards, startCycle]
-    bounds = [(0, max_semester_amount) for course in greedy_courses]
-    constraints = [
-        {'type': 'ineq', 'fun': constraint_semesterECTS, 'args': (greedy_courses, graph, min_semester_ECTS, max_semester_ECTS)},
-        {'type': 'ineq', 'fun': constraint_valid, 'args': (greedy_courses, graph, startCycle)},
+    final_suggestion = optimizeCourseSuggestion(graph, max_semester_ECTS, max_ECTS, courseRewards, greedy_suggestion[0],
+                             start_cycle_working_copy, max_semester_amount, stop_criterion)
 
-    ]
-    result = minimize(objective, greedy_order, args=args, method="SLSQP", bounds = bounds, constraints = constraints)
+    return greedy_suggestion, final_suggestion
 
-    final_suggestion = []
-    for i in range(0, max_semester_amount):
-        semester_courses_indices = [index for index, element in enumerate(result) if element == i]
-        semester_courses = [greedy_courses[index] for index in semester_courses_indices]
-        final_suggestion.append(semester_courses)
+def getPlanReward(graph, plan, start_cycle, course_rewards):
+    reward = 0
+    rewards = []
+    graph_copy = graph.copy()
+    cycle = start_cycle
+    for i in range(len(plan)):
+        skill_level = getSkillLevelsGraph(graph_copy)
+        semester_reward = calculateRewardFunctionWithPenalty(plan[i][0], course_rewards, skill_level)
+        reward += semester_reward
+        rewards.append(semester_reward)
+        takeCourses(graph_copy, plan[i][0], cycle)
+        cycle = "FWS" if cycle == "SSS" else "SSS"
 
-    return(final_suggestion)
+    return reward, rewards
+
+def printSkillDiff(graph, plan, cycle, course_rewards):
+    graph_copy = graph.copy()
+    for semester in plan:
+        print("Semester")
+        skill_level_graph = getSkillLevelsGraph(graph)
+        for course in semester[0]:
+            if course in required_skill_levels:
+                required_skills = required_skill_levels[course]
+                required_skill = sum(required_skills.values())
+                actual_skill = sum(
+                    min(skill_level_graph[skill_list.index(sub_key)], value)
+                    for sub_key, value in required_skills.items()
+                )
+            else:
+                required_skill = 0
+                actual_skill = 0
+
+            print(course + ": " + str(required_skill) + ", " + str(actual_skill) + ", " + str(course_rewards[course]))
+        takeCourses(graph, semester[0], cycle)
+        cycle = "FWS" if cycle == "SSS" else "SSS"
+
+def getBestSemesterPlan(graph, max_semester_ECTS, max_ECTS, cycle, course_rewards, successors = []):
+    availableCourses, pool_ECTS_left, current_ECTS = getAvailailableCourses_Efficient(graph, max_ECTS, cycle)
+    print(availableCourses)
+    available_courses_with_reward = []
+    skill_levels_graph = getSkillLevelsGraph(graph)
+    for courses in availableCourses:
+        reward = calculateRewardFunctionWithPenalty(courses, course_rewards, skill_levels_graph)
+        courses_ECTS = sum(int(graph.nodes[course].get("ECTS")) for course in courses)
+        available_courses_with_reward.append([courses, reward / courses_ECTS])
+
+    available_courses_with_reward_sorted =  sorted(available_courses_with_reward, key=lambda x: x[1], reverse=True)
+    best_semester_plan = []
+
+    if current_ECTS == 135:
+        print("hier")
+    added = True
+    for courses in available_courses_with_reward_sorted:
+        best_semester_plan_candidate = best_semester_plan.copy()
+        best_semester_plan_candidate.extend(courses[0])
+        best_semester_plan_candidate_ECTS = sum(int(graph.nodes[course].get("ECTS")) for course in best_semester_plan_candidate)
+        if best_semester_plan_candidate_ECTS <= max_semester_ECTS and all(course in best_semester_plan_candidate for course in successors) and \
+            checkExclusive(graph, best_semester_plan_candidate) and \
+            checkEnoughECTS_Efficient(graph, current_ECTS, pool_ECTS_left, best_semester_plan_candidate, max_ECTS) and best_semester_plan_candidate:
+            best_semester_plan.extend(courses[0])
+
+
+    best_semester_plan_ECTS = sum(int(graph.nodes[course].get("ECTS")) for course in best_semester_plan)
+    print(best_semester_plan_ECTS)
+    return [best_semester_plan, best_semester_plan_ECTS]
 
 
 
@@ -614,15 +737,15 @@ initialize(G)
 #availableCourses = getAvailailableCourses(G,180)
 #availableCourses_Efficient = getAvailailableCourses_Efficient(G,180)
 #print(getCourseAvailability(G, "Produktion", ["Produktion"]))
-weights = [5, 1,
-              5, 1,
+weights = [1, 1,
+              1, 1,
               1, 1, 1,
               1, 1, 1,
               1, 1, 1,
               1, 1,
               1, 1,
               1, 1, 1,
-              1, 2, 1, 1,
+              1, 1, 1, 1,
               1, 1, 1, 1]
 
 #print(getCourseSuggestion(G, 26, 34, 180, weights))
@@ -634,7 +757,24 @@ weights = [5, 1,
     #takeCourses(G,[course],"SSS")
 #print(getPossibleSemesterPlan_Efficient(G, 12, 34, 180, "FWS"))
 #print(getCourseAvailability(G, "Marketing", ["Recht"], "FWS"))
-print(twoStepAlgo(G, 24, 34, 180, weights, "FWS", 6))
+
+greedy, final = twoStepAlgo(G, 34, 180, weights, "FWS", 6, 0.01)
+course_rewards = getCourseRewards(G, weights)
+#final = optimizeCourseSuggestion(G, 0, 34, 180, course_rewards, [[['IS 203 Wirtschaftsinformatik III: Development and Management of Information Systems Business Informatics III: Development and Management of Information Systems', 'CS 301 Formale Grundlagen der Informatik Formal Foundations of Computer Science', 'CS 302 Praktische Informatik I Practical Computer Science I', 'CS 304 Programmierpraktikum I Programming Lab I', 'MAT 303 Lineare Algebra I Linear Algebra I'], 34], [['IS 202a Wirtschaftsinformatik IIa: Einführung in die Modellierung I: Logik Business Informatics IIa: Foundations of Modeling I: logic', 'IS 202b Wirtschaftsinformatik IIb: Einführung in die Modellierung II: Prozessmodelle Business Informatics IIb: Foundations of Modeling II: process models', 'IS 204 Wirtschaftsinformatik IV Business Informatics IV', 'CS 303 Praktische Informatik II Practical Computer Science II', 'CS 305 Programmierpraktikum II Programming Lab II', 'CS 306 Praktikum Software Engineering Software Engineering Practical', 'Präsentationskompetenz und Rhetorik Presentation skills and rhetoric', 'Programmierkurs C/C++'], 34], [['IS 201 Wirtschaftsinformatik I: Einführung und Grundlagen Business Informatics I: Introduction and Foundations', 'CS 307 Algorithmen und Datenstrukturen Algorithms and Data Structures', 'CS 309 Datenbanksysteme I Database Systems I', 'CS 405 Künstliche Intelligenz Artificial Intelligence', 'CS 408 Selected Topics in IT-Security Selected Topics in IT-Security'], 34], [['CS 308 Softwaretechnik I Software Engineering I', 'ANA 301 Analysis für Wirtschaftsinformatiker Analysis for Business Informatics', 'Grundlagen der Statistik Foundations of Statistics', 'SM 444 Bachelorseminar Prof. Bizer Seminar', 'Management'], 33], [['Zeitmanagement Time Management', 'Change- und Projektmanagement Projectmanagement', 'Finanzwirtschaft', 'Marketing', 'Produktion', 'Recht'], 27], [['BA 450 Bachelor-Abschlussarbeit Bachelor Thesis', 'Grundlagen des externen Rechnungswesens'], 18]]
+#, "FWS", 6, 0.01)
+#greedy = ([[['IS 203 Wirtschaftsinformatik III: Development and Management of Information Systems Business Informatics III: Development and Management of Information Systems', 'CS 301 Formale Grundlagen der Informatik Formal Foundations of Computer Science', 'CS 302 Praktische Informatik I Practical Computer Science I', 'CS 304 Programmierpraktikum I Programming Lab I', 'MAT 303 Lineare Algebra I Linear Algebra I'], 34], [['IS 202a Wirtschaftsinformatik IIa: Einführung in die Modellierung I: Logik Business Informatics IIa: Foundations of Modeling I: logic', 'IS 202b Wirtschaftsinformatik IIb: Einführung in die Modellierung II: Prozessmodelle Business Informatics IIb: Foundations of Modeling II: process models', 'IS 204 Wirtschaftsinformatik IV Business Informatics IV', 'CS 303 Praktische Informatik II Practical Computer Science II', 'CS 305 Programmierpraktikum II Programming Lab II', 'CS 306 Praktikum Software Engineering Software Engineering Practical', 'Präsentationskompetenz und Rhetorik Presentation skills and rhetoric', 'Programmierkurs C/C++'], 34], [['IS 201 Wirtschaftsinformatik I: Einführung und Grundlagen Business Informatics I: Introduction and Foundations', 'CS 307 Algorithmen und Datenstrukturen Algorithms and Data Structures', 'CS 309 Datenbanksysteme I Database Systems I', 'CS 405 Künstliche Intelligenz Artificial Intelligence', 'CS 408 Selected Topics in IT-Security Selected Topics in IT-Security'], 34], [['CS 308 Softwaretechnik I Software Engineering I', 'ANA 301 Analysis für Wirtschaftsinformatiker Analysis for Business Informatics', 'Grundlagen der Statistik Foundations of Statistics', 'SM 444 Bachelorseminar Prof. Bizer Seminar', 'Management'], 33], [['Zeitmanagement Time Management', 'Change- und Projektmanagement Projectmanagement', 'Finanzwirtschaft', 'Marketing', 'Produktion', 'Recht'], 27], [['BA 450 Bachelor-Abschlussarbeit Bachelor Thesis', 'Grundlagen des externen Rechnungswesens'], 18]], 180)
+#final = [[['IS 203 Wirtschaftsinformatik III: Development and Management of Information Systems Business Informatics III: Development and Management of Information Systems', 'CS 301 Formale Grundlagen der Informatik Formal Foundations of Computer Science', 'CS 302 Praktische Informatik I Practical Computer Science I', 'CS 304 Programmierpraktikum I Programming Lab I', 'MAT 303 Lineare Algebra I Linear Algebra I'], 34], [['IS 202a Wirtschaftsinformatik IIa: Einführung in die Modellierung I: Logik Business Informatics IIa: Foundations of Modeling I: logic', 'IS 202b Wirtschaftsinformatik IIb: Einführung in die Modellierung II: Prozessmodelle Business Informatics IIb: Foundations of Modeling II: process models', 'CS 303 Praktische Informatik II Practical Computer Science II', 'CS 305 Programmierpraktikum II Programming Lab II', 'Präsentationskompetenz und Rhetorik Presentation skills and rhetoric', 'SM 444 Bachelorseminar Prof. Bizer Seminar', 'ANA 301 Analysis für Wirtschaftsinformatiker Analysis for Business Informatics'], 32], [['IS 201 Wirtschaftsinformatik I: Einführung und Grundlagen Business Informatics I: Introduction and Foundations', 'CS 307 Algorithmen und Datenstrukturen Algorithms and Data Structures', 'Finanzwirtschaft', 'Marketing', 'Zeitmanagement Time Management'], 27], [['CS 308 Softwaretechnik I Software Engineering I', 'Grundlagen der Statistik Foundations of Statistics', 'Management', 'IS 204 Wirtschaftsinformatik IV Business Informatics IV', 'CS 306 Praktikum Software Engineering Software Engineering Practical'], 31], [['Change- und Projektmanagement Projectmanagement', 'Produktion', 'Recht', 'CS 408 Selected Topics in IT-Security Selected Topics in IT-Security', 'CS 405 Künstliche Intelligenz Artificial Intelligence', 'CS 309 Datenbanksysteme I Database Systems I'], 34], [['BA 450 Bachelor-Abschlussarbeit Bachelor Thesis', 'Grundlagen des externen Rechnungswesens', 'Programmierkurs C/C++'], 22]]
+
+#printSkillDiff(G, final, "FWS", course_rewards)
+
+
+#final = optimizeCourseSuggestion(G, 34, 180, course_rewards, greedy[0], "FWS", 6, 0.01)
+
+print(greedy)
+print(final)
+print("Reward greedy: " + str(getPlanReward(G, greedy[0], "FWS", course_rewards)))
+print("Reward final: " + str(getPlanReward(G, final, "FWS", course_rewards)))
+#print(getCourseRewards(G,))
 #print(getAvailailableCourses_Efficient(G, 180, "FWS", 0))
 endzeit = time.time()
 ausfuehrungszeit = endzeit - startzeit
@@ -647,9 +787,6 @@ print(f"Die Methode hat {ausfuehrungszeit:.5f} Sekunden benötigt.")
 #print(checkEnoughECTS(G, "IS 201 Wirtschaftsinformatik I: Einführung und Grundlagen Business Informatics I: Introduction and Foundations", 180))
 #print(required_skill_levels)
 #print(getAvailailableCourses_Efficient(G, 180))
-
-
-
 
 
 

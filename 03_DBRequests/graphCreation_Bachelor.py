@@ -243,6 +243,9 @@ def getCourseSkillWeights(graph, database, min):
         #Get all courses that have an ingoing edge that is outgoing from the considered skill
         courses_requiring_skill = [tmp_edge[1] for tmp_edge in skill_course_edges if tmp_edge[0] == skill]
 
+        if course_providing_skill in courses_requiring_skill:
+            courses_requiring_skill.remove(course_providing_skill)
+
         average_grades_with_course = []
         average_grades_without_course = []
 

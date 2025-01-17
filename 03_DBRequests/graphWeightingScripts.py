@@ -21,25 +21,25 @@ conn.close()
 
 #Creation of course -> skill weights
 #Bachelor
-#weights = gcB.getCourseSkillWeights(G_Bachelor, database, 0.1)
-#df = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count with Course", "Count without Course"])
-#df.to_excel("CourseSkillWeights_Bachelor.xlsx", index = False)
+weights = gcB.getCourseSkillWeights(G_Bachelor, database, 0.1)
+df = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count with Course", "Count without Course"])
+df.to_excel("CourseSkillWeights_Bachelor.xlsx", index = False)
 #Master
-#weights = gcM.getCourseSkillWeights(G_Master, database, 0.1)
-#df = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count with Course", "Count without Course"])
-#df.to_excel("CourseSkillWeights_Master.xlsx", index = False)
+weights = gcM.getCourseSkillWeights(G_Master, database, 0.1)
+df = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count with Course", "Count without Course"])
+df.to_excel("CourseSkillWeights_Master.xlsx", index = False)
 
 
 #Creation of skill -> course weights
 #Bachelor
-weights, edges_to_check = gcB.getSkillCourseWeights(G_Bachelor, database)
-df_weights = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count"])
-df_edges_to_check = pd.DataFrame(edges_to_check, columns=["Name", "Name_Full", "Skill"])
-df_weights.to_excel("SkillCourseWeights_Bachelor.xlsx", index = False)
-df_edges_to_check.to_excel("EdgesToCheck_Bachelor.xlsx", index = False)
+#weights, edges_to_check = gcB.getSkillCourseWeights(G_Bachelor, database)
+#df_weights = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count"])
+#df_edges_to_check = pd.DataFrame(edges_to_check, columns=["Name", "Name_Full", "Skill"])
+#df_weights.to_excel("SkillCourseWeights_Bachelor.xlsx", index = False)
+#df_edges_to_check.to_excel("EdgesToCheck_Bachelor.xlsx", index = False)
 #Master
-weights, edges_to_check = gcM.getSkillCourseWeights(G_Master, database)
-df_weights = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count"])
-df_edges_to_check = pd.DataFrame(edges_to_check, columns=["Name", "Name_Full", "Skill"])
-df_weights.to_excel("SkillCourseWeights_Master.xlsx", index = False)
-df_edges_to_check.to_excel("EdgesToCheck_Master.xlsx", index = False)
+#weights, edges_to_check = gcM.getSkillCourseWeights(G_Master, database)
+#df_weights = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count"])
+#df_edges_to_check = pd.DataFrame(edges_to_check, columns=["Name", "Name_Full", "Skill"])
+#df_weights.to_excel("SkillCourseWeights_Master.xlsx", index = False)
+#df_edges_to_check.to_excel("EdgesToCheck_Master.xlsx", index = False)

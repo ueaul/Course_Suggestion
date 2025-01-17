@@ -1,5 +1,6 @@
 import pandas as pd
 import re
+import networkx as nx
 import sqlite3
 
 
@@ -227,6 +228,17 @@ def complete_edges(courses, edges):
                     for exclusive_course_name in exclusive_course_names:
                         additional_edges.append([exclusive_course_name, course_name, -1])
 
+        row = course[course.iloc[:, 0] == "Successor"]
+        if not row.empty:
+            if pd.notna(row.iloc[0, 1]):
+                successor_courses_raw = row.iloc[0, 1]
+                successor_courses = [course.strip() for course in successor_courses_raw.split(",")]
+
+                for successor_course in successor_courses:
+                    successor_courses_names = getMatchingCourses(successor_course, course_names, course_name)
+                    for successor_courses_name in successor_courses_names:
+                        additional_edges.append([course_name, successor_courses_name, 3])
+
     return additional_edges, helper_nodes
 
 def getFilteredEdges(graph, outgoing_node_attribute, ingoing_node_attribute, outgoing_node_value, ingoing_node_value):
@@ -258,6 +270,9 @@ def getCourseSkillWeights(graph, database, min):
 
         #Get all courses that have an ingoing edge that is outgoing from the considered skill
         courses_requiring_skill = [tmp_edge[1] for tmp_edge in skill_course_edges if tmp_edge[0] == skill]
+
+        if course_providing_skill in courses_requiring_skill:
+            courses_requiring_skill.remove(course_providing_skill)
 
         average_grades_with_course = []
         average_grades_without_course = []
@@ -387,3 +402,22 @@ def getSkillCourseWeights(graph, database):
                                          len(skill_levels_for_passing)])
 
     return skill_course_edge_weights, edges_to_check
+
+def createPools(graph):
+    for node in graph.nodes:
+        if graph.nodes[node].get("type") == "course":
+            if node[0:6] in ["CS 500", "CS 530", "CS 550", "CS 560", "IE 500", "IE 560", "IS 553"]:
+                graph.nodes[node]["pool"] = "Fundamentals Computer Science"
+            elif node[0:3] in ["ACC", "TAX", "FIN", "MAN", "MKT", "OPM"]:
+                graph.nodes[node]["pool"] = "Fundamentals Business Administration"
+            elif node[0:4] in ["CS 7", "IE 7", "IS 7"]:
+                graph.nodes[node]["pool"] = "Seminars"
+            elif node[0:2] in ["CS", "IE", "IS"]:
+                graph.nodes[node]["pool"] = "Specialization Courses"
+            elif node == "SQ 500 Scientific Research":
+                graph.nodes[node]["pool"] = "Scientific Research"
+            elif node[0:6] == "TP 500":
+                graph.nodes[node]["pool"] = "Projects"
+            elif node == "MA 650 Master Thesis":
+                graph.nodes[node]["pool"] = "Thesis"
+    return graph

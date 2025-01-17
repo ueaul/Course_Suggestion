@@ -255,7 +255,7 @@ def getCourseSkillWeights(graph, database, min):
             query = """SELECT AVG(note), COUNT(note) 
                        FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
                        WHERE ? LIKE p.bezeichnung || '%' AND s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Bachelor' 
-                       AND (p.status = "BE" OR p.status = "NB")
+                       AND p.status IN ("BE", "NB") AND s.status IN ("BE", "R", "NB", "N")
                        AND EXISTS(
                            SELECT *
                            FROM pruefungsleistung p2 JOIN studium s2 ON p2.studium_id = s2.studium_id
@@ -269,7 +269,7 @@ def getCourseSkillWeights(graph, database, min):
             query = """SELECT AVG(note), COUNT(note) 
                         FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
                         WHERE ? LIKE p.bezeichnung || '%' AND s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Bachelor'
-                        AND (p.status = "BE" OR p.status = "NB")
+                        AND p.status IN ("BE", "NB") AND s.status IN ("BE", "R", "NB", "N")
                         AND NOT EXISTS(
                            SELECT *
                            FROM pruefungsleistung p2 JOIN studium s2 ON p2.studium_id = s2.studium_id
@@ -334,7 +334,7 @@ def getSkillCourseWeights(graph, database):
         query = """SELECT DISTINCT p.studium_id, p.semester
                    FROM pruefungsleistung p JOIN studium s ON p.studium_id = s.studium_id
                    WHERE s.studium_bezeichnung = 'Wirtschaftsinformatik' AND s.studium_art = 'Bachelor' AND 
-                   p.status = "BE" AND ? LIKE p.bezeichnung || '%'
+                   p.status = "BE" AND ? LIKE p.bezeichnung || '%' AND s.status IN ("BE", "R", "NB", "N")
                     """
         cursor.execute(query, (course_requiring_skill_mapped,))
         students_passed_course = cursor.fetchall()
