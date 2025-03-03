@@ -35,5 +35,5 @@ This folder contains all code created for the implementation of our approach and
 	Contains all files relevant for the creation of the graph as well as the final graphml file
 
 -03_DBRequests:
-This folder contains a txt file with all SQL queries that have been executed against the database as well all code used for the weighting of the edges between course and skill nodes
+This folder contains a txt file with all SQL queries that have been executed against the database as well the code used for the weighting of the edges between course and skill nodes.
 The corresponding code and graph files are copies of the code and graph files that are stored in the folders 01_BachelorWifoMannheim and 02_MasterWifoMannheim
