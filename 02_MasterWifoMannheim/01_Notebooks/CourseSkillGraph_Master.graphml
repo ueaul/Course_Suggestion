@@ -228,7 +228,7 @@
       <data key="d4">False</data>
       <data key="d5">Specialization Courses</data>
     </node>
-    <node id="TP 500 Team Project">
+    <node id="TP 500 Team Project Full">
       <data key="d0">12</data>
       <data key="d1">Continuously</data>
       <data key="d2">grey</data>
@@ -829,7 +829,7 @@
       <data key="d5">Seminars</data>
     </node>
     <node id="IS 722 Seminar: Context-Aware and Distributed Systems">
-      <data key="d0">6</data>
+      <data key="d0">4</data>
       <data key="d1">Continuously</data>
       <data key="d2">grey</data>
       <data key="d3">course</data>
@@ -837,7 +837,7 @@
       <data key="d5">Seminars</data>
     </node>
     <node id="IS 742 Seminar Trends in Enterprise Systems">
-      <data key="d0">6</data>
+      <data key="d0">4</data>
       <data key="d1">Continuously</data>
       <data key="d2">grey</data>
       <data key="d3">course</data>
@@ -845,7 +845,7 @@
       <data key="d5">Seminars</data>
     </node>
     <node id="IS 752 Seminar on Process and Management Analytics">
-      <data key="d0">6</data>
+      <data key="d0">4</data>
       <data key="d1">Continuously</data>
       <data key="d2">grey</data>
       <data key="d3">course</data>
@@ -1512,27 +1512,27 @@
       <data key="d4">False</data>
     </node>
     <node id="IT Management (ITM)">
-      <data key="d2">brown</data>
+      <data key="d2">red</data>
       <data key="d3">skill</data>
       <data key="d4">False</data>
     </node>
     <node id="Economics (ECO)">
-      <data key="d2">brown</data>
+      <data key="d2">red</data>
       <data key="d3">skill</data>
       <data key="d4">False</data>
     </node>
     <node id="Law (LAW)">
-      <data key="d2">brown</data>
+      <data key="d2">red</data>
       <data key="d3">skill</data>
       <data key="d4">False</data>
     </node>
     <node id="Scientific Work (SW)">
-      <data key="d2">brown</data>
+      <data key="d2">red</data>
       <data key="d3">skill</data>
       <data key="d4">False</data>
     </node>
     <node id="Business Process Management (BPM)">
-      <data key="d2">brown</data>
+      <data key="d2">red</data>
       <data key="d3">skill</data>
       <data key="d4">False</data>
     </node>
@@ -1889,9 +1889,17 @@
       <data key="d8">False</data>
       <data key="d9">0.001</data>
     </edge>
-    <edge source="TP 500 Team Project" target="Scientific Work (SW)">
+    <edge source="TP 500 Team Project Full" target="Scientific Work (SW)">
       <data key="d8">False</data>
       <data key="d9">0.0884861774996304</data>
+    </edge>
+    <edge source="TP 500 Team Project Full" target="TP 500 Team Project Split 1">
+      <data key="d10">-1</data>
+      <data key="d8">False</data>
+    </edge>
+    <edge source="TP 500 Team Project Full" target="TP 500 Team Project Split 2">
+      <data key="d10">-1</data>
+      <data key="d8">False</data>
     </edge>
     <edge source="SQ 500 Scientific Research" target="Scientific Work (SW)">
       <data key="d8">False</data>
@@ -3213,6 +3221,10 @@
       <data key="d8">False</data>
       <data key="d9">0.001</data>
     </edge>
+    <edge source="TP 500 Team Project Split 1" target="TP 500 Team Project Full">
+      <data key="d10">-1</data>
+      <data key="d8">False</data>
+    </edge>
     <edge source="TP 500 Team Project Split 1" target="TP 500 Team Project Split 2">
       <data key="d10">3</data>
       <data key="d8">False</data>
@@ -3220,6 +3232,10 @@
     <edge source="TP 500 Team Project Split 2" target="Scientific Work (SW)">
       <data key="d8">False</data>
       <data key="d9">0.0884861774996304</data>
+    </edge>
+    <edge source="TP 500 Team Project Split 2" target="TP 500 Team Project Full">
+      <data key="d10">-1</data>
+      <data key="d8">False</data>
     </edge>
     <edge source="Software Development Fundamentals (SDF)" target="CS 530 Database Systems II (DBSII)">
       <data key="d8">False</data>

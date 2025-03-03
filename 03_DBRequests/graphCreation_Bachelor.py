@@ -3,6 +3,7 @@ import re
 import networkx as nx
 import sqlite3
 
+#Construct the course name based on the first row of the DataFrame representing the course
 def getCourseName(course):
     course_name = ""
 
@@ -17,6 +18,7 @@ def getCourseName(course):
 
     return course_name
 
+#Mapping from the course names in the graph to the course names in the database
 def mapGraphToDB_courseName(course_name):
     if isinstance(course_name, pd.DataFrame):
         course_name = getCourseName(course_name)
@@ -50,7 +52,7 @@ def mapGraphToDB_courseName(course_name):
     else:
         return course_name
 
-
+#Mapping from the course names in the database to the course names in the graph
 def mapDBtoGraph_courseName(course_name):
     if isinstance(course_name, pd.DataFrame):
         course_name = getCourseName(course_name)
@@ -84,6 +86,24 @@ def mapDBtoGraph_courseName(course_name):
     else:
         return course_name
 
+#Reconstructs the full course name by matching a search string to a list of course names
+def getFullCourseName(searchString, CourseNames):
+    for courseName in CourseNames:
+        if searchString in courseName:
+            return courseName
+
+    return ""
+
+#Extracts the course names that match the search string and not match the main course
+def getMatchingCourses(searchString, courseNames, mainCourse):
+    matchingCourses = []
+    for courseName in courseNames:
+        if searchString in courseName and not mainCourse in courseName:
+            matchingCourses.append(courseName)
+
+    return matchingCourses
+
+#Extract the information for the construction of the course nodes from the DataFrames representing the courses
 def getCourseNodes(courses):
     nodes = []
 
@@ -104,22 +124,7 @@ def getCourseNodes(courses):
 
     return nodes
 
-def getFullCourseName(searchString, CourseNames):
-    for courseName in CourseNames:
-        if searchString in courseName:
-            return courseName
-
-    return ""
-
-def getMatchingCourses(searchString, courseNames, mainCourse):
-    matchingCourses = []
-    for courseName in courseNames:
-        if searchString in courseName and not mainCourse in courseName:
-            matchingCourses.append(courseName)
-
-    return matchingCourses
-
-
+#Create all edges representing prerequiste relationships as well as the skill -> course edges
 def complete_edges(courses, edges):
     additional_edges = []
 
@@ -137,8 +142,6 @@ def complete_edges(courses, edges):
 
         # Get name of course
         course_name = getCourseName(course)
-        if course_name == "CS 308 Softwaretechnik I Software Engineering I":
-            print("hier")
 
         # Get row where courses containing required knowledge are contained
         row = course[course.iloc[:, 0] == "Vorausgesetzte Kenntnisse"]
@@ -189,7 +192,7 @@ def complete_edges(courses, edges):
                                 for matching_course in matching_courses:
                                     if not gate_created:
                                         helper_nodes.append(
-                                            ["MIN " + str(prerequisite_index), "white", "prerequisite", "MIN", 1])
+                                            ["MIN " + str(prerequisite_index), "yellow", "prerequisite", "MIN", 1])
                                         additional_edges.append(["MIN " + str(prerequisite_index), course_name, 1])
                                         gate_created = True
                                     additional_edges.append([matching_course, "MIN " + str(prerequisite_index), 1])
@@ -214,6 +217,7 @@ def complete_edges(courses, edges):
 
     return additional_edges, helper_nodes
 
+#Extract all edges where the connected nodes have a certain value for one of their attributes
 def getFilteredEdges(graph, outgoing_node_attribute, ingoing_node_attribute, outgoing_node_value, ingoing_node_value):
     filteredEdges = []
 
@@ -224,6 +228,7 @@ def getFilteredEdges(graph, outgoing_node_attribute, ingoing_node_attribute, out
 
     return filteredEdges
 
+#Script for weighting the course -> skill edges
 def getCourseSkillWeights(graph, database, min):
     course_skill_edge_weights = []
 
@@ -316,6 +321,7 @@ def getCourseSkillWeights(graph, database, min):
 
     return course_skill_edge_weights
 
+#Script for weighting the skill -> course edges
 def getSkillCourseWeights(graph, database):
     course_names_graph = list(graph.nodes())
 
@@ -381,26 +387,26 @@ def createPools(graph):
             if node.startswith("BA "):
                 graph.nodes[node]["pool"] = "Thesis"
             elif node.startswith("SM "):
-                graph.nodes[node]["pool"] = "Seminar"
+                graph.nodes[node]["pool"] = "Seminars"
             elif node in ["Konfliktmanagement", "Kommunikation im Team", "Programmierkurs C/C++", "Sprachkurs"]:
-                graph.nodes[node]["pool"] = "Key Qualification Pool"
+                graph.nodes[node]["pool"] = "Key Qualifications Pool"
             elif node in ["Zeitmanagement Time Management",
                           "Präsentationskompetenz und Rhetorik Presentation skills and rhetoric",
                           "Change- und Projektmanagement Projectmanagement"]:
-                graph.nodes[node]["pool"] = "Key Qualification"
+                graph.nodes[node]["pool"] = "Key Qualifications"
             elif node in ["Grundlagen der Volkswirtschaftslehre", "Recht"]:
-                graph.nodes[node]["pool"] = "Elective"
+                graph.nodes[node]["pool"] = "Elective Courses"
             elif node[0:6] in ["IS 405", "CS 405", "CS 406", "CS 408", "CS 605", "CS 414"] or node[0:7] == "MAN 455":
-                graph.nodes[node]["pool"] = "Specialization"
+                graph.nodes[node]["pool"] = "Specialization Courses"
             elif node in ["MAT 303 Lineare Algebra I Linear Algebra I",
                           "ANA 301 Analysis für Wirtschaftsinformatiker Analysis for Business Informatics",
                           "Grundlagen der Statistik Foundations of Statistics"]:
-                graph.nodes[node]["pool"] = "Mathematics and Statistics"
+                graph.nodes[node]["pool"] = "Fundamentals Mathematics and Statistics"
             elif node in ["Marketing", "Produktion", "Internes Rechnungswesen",
                           "Grundlagen des externen Rechnungswesens", "Finanzwirtschaft", "Management"]:
-                graph.nodes[node]["pool"] = "Business|Elective"
+                graph.nodes[node]["pool"] = "Fundamentals Business Administration|Elective Courses|Specialization Courses"
             elif node.startswith("CS "):
-                graph.nodes[node]["pool"] = "Computer Science"
+                graph.nodes[node]["pool"] = "Fundamentals Computer Science"
             elif node.startswith("IS "):
-                graph.nodes[node]["pool"] = "Information Systems"
+                graph.nodes[node]["pool"] = "Fundamentals Information Systems"
     return graph

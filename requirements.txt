@@ -1,0 +1,5 @@
+camelot_py==0.11.0
+matplotlib==3.10.1
+networkx==3.2.1
+numpy==2.2.3
+pandas==2.2.3

@@ -1,374 +1,363 @@
-"Kurs","Count","Start","Ende"
-"- Kommunikationspolitik","7","20101","20131"
-"- Marketingtheorie","7","20101","20131"
-"ACC 350 International Accounting [engl. Exp.]","5","20102","20152"
-"ACC 510 Jahresabschluss","3","20201","20222"
-"ACC 511 Konzernrechnungslegung","5","20102","20181"
-"ACC 512 Jahresabschluss","2","20121","20151"
-"ACC 520 IFRS Reporting and Capital Markets","2","20191","20202"
-"ACC 530 Group Accounting","1","20212","20222"
-"ACC 531 Unternehmensbewertung","3","20112","20201"
-"ACC 532 Financial Statement Analysis & Equity Valuation","5","20102","20192"
-"ACC 540 Financial Statement Analysis & Equity Valuation","12","20172","20222"
-"ACC 551 Controlling","3","20102","20152"
-"ACC 552 Wertorientiertes Controlling in der Unternehmenspraxis","5","20102","20161"
-"ACC 553 Controlling","34","20111","20172"
-"ACC 554 Internationales Konzerncontrolling","19","20102","20171"
-"ACC 571 PrÃ¼fungslehre und -praxis","1","20102","20131"
-"ACC 574 Business Opportunities in the Clean Energy Transition","2","20172","20201"
-"ACC 620 Accounting for Financial Instruments & Financial Institutions","1","20192","20221"
-"ACC 625 Practical Aspects of M&A Processes","1","20102","20121"
-"ACC 627 Fallstudien 'Beratung von Finanzdienstleistern'","3","20172","20201"
-"ACC 630 Integriertes Controlling 1 - Planung und Budgetierung","4","20151","20211"
-"ACC 631 Integriertes Controlling 2 - Reporting und Performancesteuerung","3","20142","20202"
-"ACC 636 Fallstudien fÃ¼r das wertorientierte Risiko-Controlling und -Management im Bankbereich","1","20172","20211"
-"ACC 653 Kostenmanagement und - analyse","18","20102","20172"
-"ACC 670 Audit Theory","1","20192","20211"
-"ACC 672 Corporate Governance Theorie","7","20102","20151"
-"BI 651 International Course - Information Technology","1","20122","20152"
-"BI 652 International Course - System Design and Development","1","20122","20142"
-"BI 653 International Course - Enterprise Applications","5","20131","20162"
-"BI 654 International Course - Data and Web Science","1","20161","20182"
-"BI 654 Professional Content Management Systems","1","20102","20131"
-"Burnout PrÃ¤ventation","4","20101","20132"
-"Business Etikette - internationale Do's und Don'ts","5","20102","20132"
-"Business Model Innovation","1","20112","20152"
-"CC 501 Decision Analysis: Business Analytics II","184","20102","20202"
-"CC 503 Empirical Methods: Business Analytics I","95","20101","20191"
-"Core skills for young professionals","5","20101","20132"
-"Corporate Social Responsibility","5","20102","20152"
-"Corporate Strategy","1","20121","20151"
-"CS 302 Praktische Informatik I","32","20101","20152"
-"CS 307 Algorithmen und Datenstrukturen","50","20101","20221"
-"CS 309 Datenbanksysteme I","1","20201","20221"
-"CS 500 Advanced Software Engineering","1392","20101","20222"
-"CS 530 Database Systems II","617","20101","20222"
-"CS 540 Advanced Computer Networks","658","20101","20222"
-"CS 550 Algorithmics","332","20102","20222"
-"CS 560 Large-Scale Data Management","652","20122","20222"
-"CS 600 Model Driven Development","257","20102","20222"
-"CS 604 Resilient Networking","4","20102","20142"
-"CS 605 GPU Programming","4","20192","20222"
-"CS 610 Principles of Dependables Systems","1","20102","20122"
-"CS 620 Design of Reliable Systems","3","20102","20141"
-"CS 621 Logikprogrammierung","2","20121","20151"
-"CS 631 Transaktionssysteme","6","20152","20192"
-"CS 640 Multimedia Technology","38","20111","20191"
-"CS 642 Image and Video Processing","23","20112","20172"
-"CS 643 Embedded Systems for Industrial Applications","4","20102","20142"
-"CS 644 Computer Graphics","27","20112","20211"
-"CS 645 Computer Games","46","20112","20211"
-"CS 646 Higher Level Computer Vision","38","20152","20222"
-"CS 647 Image Processing","33","20161","20222"
-"CS 649 Secure Programming","11","20151","20211"
-"CS 650 Algorithmik II","1","20102","20132"
-"CS 651 Cryptography II","33","20102","20222"
-"CS 651 Kryptographie II","33","20102","20222"
-"CS 652 Data Security","356","20161","20222"
-"CS 653 Practical Applications of Cryptography","2","20152","20211"
-"CS 654 Internet of Things Security","3","20192","20222"
-"CS 655 Cryptography","32","20191","20222"
-"CS 660 Compiler Construction","3","20202","20222"
-"CS 661 Parallel Programming","5","20202","20222"
-"CS 663 Information Retrieval and Web Search","3","20122","20151"
-"CS 665 Selected Topics in IT-Security","11","20122","20171"
-"CS 667 Computer Vision","20","20122","20211"
-"CS 669 Design of Reliable and Dependable Systems","2","20152","20181"
-"CS 701 Selected Topics in Algorithmics and Cryptography","1","20192","20211"
-"CS 703 Data Analytics Seminar","4","20122","20162"
-"CS 704 Master Seminar Artificial Intelligence","61","20122","20222"
-"CS 705 Datenbankseminar","25","20132","20222"
-"CS 706 Seminar","19","20122","20172"
-"CS 707 Seminar Data and Web Science","79","20112","20222"
-"CS 708 Seminar Software Engineering","126","20122","20222"
-"CS 709 Seminar Text Analytics","73","20122","20222"
-"CS 710 Seminar Selected Topics in Data Science","26","20152","20222"
-"CS 711 Intelligent Software Infrastructures - Processes, Methods and Technologies","2","20142","20171"
-"CS 714 Seminar","3","20142","20172"
-"CS 715 Large-Scale Data Integration Seminar","30","20162","20222"
-"CS 716 Seminar IT-Security","26","20171","20222"
-"CS 717 Master Seminar on Computer Vision","7","20181","20222"
-"CS 718 AI and Data Science in Fiction and Society","21","20181","20222"
-"CS 719 Seminar on Process Analysis","16","20191","20222"
-"CS 721 Seminar Data-Science I","4","20202","20222"
-"Didaktik wirtschaftsethischen Argumentierens","2","20102","20131"
-"Diversity Management","3","20101","20132"
-"Dummy 1","189","20101","20222"
-"Dummy 10","7","20192","20222"
-"Dummy 2","133","20101","20222"
-"Dummy 3","64","20101","20222"
-"Dummy 4","26","20101","20222"
-"Dummy 5","6","20112","20201"
-"Dummy 6","3","20112","20191"
-"Dummy 7","1","20162","20191"
-"Dummy 8","1","20162","20191"
-"Dummy 9","1","20162","20191"
-"DurchsetzungsfÃ¤higkeit und Verhandlungstechnik - Beruflich und Privat erfolgreich kommunizieren","1","20111","20132"
-"E-Government: Implikationen, Wirkungsweisen und E-Democracy","1","20102","20132"
-"Entscheidungspsychologie","4","20101","20131"
-"FIN 500 Investments","150","20102","20222"
-"FIN 520 Bankbetriebslehre","20","20102","20202"
-"FIN 540 Corporate Finance I - Lecture (Capital Structure, Cost of Capital and Valuation)","8","20122","20222"
-"FIN 541 Corporate Finance I - Case Study (Capital Structure, Cost of Capital and Valuation)","2","20182","20211"
-"FIN 560 Risikomanagement von Versicherungsunternehmen","5","20102","20222"
-"FIN 561 Investmentmanagement von Versicherungsunternehmen","5","20102","20222"
-"FIN 580 Derivatives I - Basic Strategies and Pricing","49","20102","20222"
-"FIN 590 Financial Institutions I","2","20172","20221"
-"FIN 601 Bond Markets","42","20111","20222"
-"FIN 602 Trading and Exchanges","17","20112","20222"
-"FIN 620 Behavioral Finance","3","20172","20221"
-"FIN 630 Corporate Governance","9","20122","20222"
-"FIN 660 Quantitatives Risikomanagement","26","20171","20222"
-"FIN 682 International Asset Management","17","20171","20222"
-"Finanzwirtschaft","3","20102","20121"
-"Fit fÃ¼r den Ã¶ffentlichen Auftritt","1","20102","20122"
-"Great Presentation Now! A practical toolkit for effectiveness and confidence","4","20102","20141"
-"IE 500 Data Mining I","1021","20101","20222"
-"IE 550 Knowledge Management: Principles and Technologies","601","20101","20211"
-"IE 560 Decision Support","409","20112","20222"
-"IE 630 Query Optimization","32","20122","20222"
-"IE 650 Semantic Web Technologies","142","20102","20222"
-"IE 660 Artificial Intelligence","33","20102","20171"
-"IE 661 Text Analytics","415","20122","20222"
-"IE 663 Information Retrieval and Web Search","208","20122","20222"
-"IE 664 Process Mining","14","20122","20182"
-"IE 670 Web Data Integration","181","20112","20222"
-"IE 671 Web Mining","261","20102","20222"
-"IE 672 Data Mining II","335","20121","20222"
-"IE 673 Data Mining and Matrices","46","20132","20211"
-"IE 674 Hot Topics in Machine Learning","56","20142","20222"
-"IE 675 Machine Learning","56","20161","20222"
-"IE 675b Machine Learning","26","20201","20222"
-"IE 676 Network Analysis","93","20182","20222"
-"IE 678 Deep Learning","8","20192","20222"
-"IE 680 Human-Computer-Interaction: Fundamentals and Research Methods","10","20112","20162"
-"IE 681 Interactive Multimedia Systems","1","20122","20152"
-"IE 682 Enterprise Architecture Modeling","156","20132","20201"
-"IE 683 Web Data Integration Project","79","20161","20222"
-"IE 684 Web Mining Project","86","20172","20222"
-"IE 689 Relational Learning","9","20172","20221"
-"IE 690 Information Architecture","3","20122","20161"
-"IE 691 Information Retrieval Project","52","20161","20222"
-"IE 692 Advanced Process Mining","66","20182","20222"
-"IE 694 Artificial Intelligence Applications in Industry","4","20202","20222"
-"IE 704 Seminar AI Systems Engineering","11","20181","20222"
-"Improvisationstraining","3","20102","20131"
-"InterdisziplinÃ¤res Kulturmanagement","1","20111","20132"
-"Interkulturelle Sensibilisierung","6","20101","20132"
-"International Business Negotiations and Assertiveness - Getting results in business and life","10","20101","20151"
-"International Course I","5","20102","20171"
-"International Course II","1","20141","20161"
-"International Course III","1","20141","20161"
-"IS 203 Wirtschaftsinformatik III: Development and Management of Information Systems","20","20101","20142"
-"IS 204 Wirtschaftsinformatik IV","28","20112","20152"
-"IS 401 Integrated Information Systems","15","20101","20141"
-"IS 500 E-Business and Electronic Markets","30","20112","20171"
-"IS 510 Process Management","857","20101","20222"
-"IS 511 Information Resource Management","343","20102","20222"
-"IS 512 IT Management in the Digital Age","267","20151","20222"
-"IS 513 Applied IT Management in the Digital Age","116","20152","20222"
-"IS 514 Process Mining and Analytics","33","20182","20222"
-"IS 515 Process Management & Analytics","31","20192","20222"
-"IS 520 Advanced Middleware","23","20101","20141"
-"IS 530 Component Based Systems","88","20101","20171"
-"IS 540 Management of Enterprise Systems","833","20101","20222"
-"IS 541 Theories and Methods in Information Systems","94","20102","20222"
-"IS 551 Foundations of Data Management","18","20112","20222"
-"IS 553 System Software","338","20121","20222"
-"IS 556 Public Blockchains","5","20202","20222"
-"IS 600 E-Government: Methoden, Technologien und Prozesse","14","20101","20141"
-"IS 601 Cloud Computing: Technologies, Applications, Services and Implications","9","20101","20141"
-"IS 602 Business Intelligence and Business Analytics Systems","554","20101","20222"
-"IS 603 User Productivity","14","20101","20151"
-"IS 604 Contemporary Issues in Enterprise Systems: Banking Enterprise Systems","84","20101","20222"
-"IS 605 IT-Driven Government Modernization: International Case Studies","26","20112","20161"
-"IS 606 Strategies for Electronic Commerce","8","20111","20142"
-"IS 607 Digital Innovation","18","20192","20222"
-"IS 610 Information Resource Management","19","20101","20142"
-"IS 611 Case Studies in Information Systems","2","20102","20152"
-"IS 612 Banking und IT-Management","4","20102","20132"
-"IS 613 Applied Project in Design Thinking and Lean Software Development","222","20101","20222"
-"IS 613 Applied Project in Enterprise Cloud Design and Development","222","20101","20222"
-"IS 614 Corporate Knowledge Management","593","20102","20222"
-"IS 615 - Enterprise Cloud Design and Development","472","20102","20222"
-"IS 615 Design Thinking and Lean Development in Enterprise Software Development","472","20102","20222"
-"IS 620 Distributed Virtual Environments","2","20101","20122"
-"IS 621 Internet Technologies","5","20101","20132"
-"IS 621 Self-Organizing and Adaptive Systems","29","20191","20222"
-"IS 622 Mobile Computing","1","20101","20121"
-"IS 622 Network Science","11","20202","20222"
-"IS 624 Mobile Computing","21","20102","20142"
-"IS 625 Pervasive Computing","316","20102","20222"
-"IS 626 Distributed Virtual Environments","5","20102","20141"
-"IS 627 Self-organizing Systems","150","20102","20222"
-"IS 629 Agile Software Product Management and Design","515","20101","20222"
-"IS 630 Machine Learning","22","20112","20171"
-"IS 631 Component Data Management","2","20102","20141"
-"IS 632 Supply Chain Management","189","20101","20222"
-"IS 633 E-Commerce","52","20102","20161"
-"IS 650 Simulation","1","20102","20121"
-"IS 651 Behavioral Perspectives on E-Business","26","20132","20202"
-"IS 666 E-Commerce","3","20101","20132"
-"IS 702 Seminar E-Business & E-Government","4","20111","20142"
-"IS 712 Seminar","183","20102","20222"
-"IS 722 Seminar Trends in Distributed Systems","91","20102","20222"
-"IS 732 Seminar","18","20102","20171"
-"IS 742 Seminar Trends in Enterprise Systems","139","20102","20222"
-"IS 751 E-Government Adoption","8","20122","20182"
-"IS 752 Seminar on Process and Management Analytics","7","20192","20222"
-"IS/MAN 500 Information Systems in Organizations","53","20102","20192"
-"IS/MKT 500 E-Business and Electronic Markets","234","20101","20162"
-"Kolloquium","1","20142","20162"
-"Kommunikation und Mediation im internationalen Kontext","2","20102","20141"
-"Konflikte-Chance oder /Risiko","1","20101","20131"
-"KÃ¶rpersprache","7","20101","20132"
-"Kultinational - Leben und Arbeiten im interkulturellen Kontext","1","20102","20122"
-"Kunst der Debatte","1","20102","20152"
-"Kunst der Rede","1","20102","20132"
-"Kwerkarriere (die Karriere-Mechanik, Alternativen, wie bringt es wer zur Elite)","3","20102","20132"
-"Literature, Business and Economics","5","20101","20132"
-"MAN 301 Strategic and International Management","8","20102","20152"
-"MAN 356 Strategy and Innovation","1","20121","20151"
-"MAN 401 Organization and Human Resources Management","14","20102","20161"
-"MAN 500 Advanced Management Studies","1","20102","20132"
-"MAN 611 Management Ã¶ffentlicher Dienstleistungen","6","20102","20141"
-"MAN 613 New Public Management","2","20102","20161"
-"MAN 616 Branchenspezifische Herausforderungen im Nonprofit Management","2","20112","20151"
-"MAN 621 Organisationsgestaltung","1","20101","20131"
-"MAN 622 Verhalten in Organisationen","1","20101","20131"
-"MAN 625 Organizational Structures Within and Between Firms","3","20121","20171"
-"MAN 627 Organizational Design and Technology","77","20101","20152"
-"MAN 628 Organizational Theory and Design","5","20102","20151"
-"MAN 629 Organization for Innovation","39","20101","20162"
-"MAN 630 Introduction to Entrepreneurship","208","20101","20222"
-"MAN 631 Creativity and Entrepreneurship in Practice","55","20102","20222"
-"MAN 632 Advanced Entrepreneurship","77","20102","20222"
-"MAN 633 Entrepreneurial Spirit","87","20111","20222"
-"MAN 635 Social Entrepreneurship: Targeting Social Capital through Ecopreneurship","26","20111","20222"
-"MAN 636 International Entrepreneurship and Managing Change","23","20101","20222"
-"MAN 640 HR Performance Management","4","20101","20131"
-"MAN 641 Human Capital Management","5","20101","20132"
-"MAN 642 International Human Resource Management & Employment Relations","2","20101","20131"
-"MAN 644 Human Resource Training and Development","1","20211","20222"
-"MAN 645 Leadership and Motivation","310","20102","20222"
-"MAN 646 HR Analytics","28","20112","20222"
-"MAN 647 Strategic and International Human Resource Management","94","20112","20222"
-"MAN 648 Incentives and Performance","172","20111","20222"
-"MAN 649 Human Resource Recruitment and Selection","3","20192","20222"
-"MAN 650 International Management I","28","20101","20151"
-"MAN 651 Strategic Management I","17","20101","20152"
-"MAN 652 Strategic Management II","13","20111","20152"
-"MAN 654 Corporate Restructuring","4","20151","20201"
-"MAN 655  Corporate Strategy: Managing Business Groups","10","20131","20222"
-"MAN 656 Mergers & Acquisitions","12","20131","20222"
-"MAN 657 Global Strategic Management","31","20122","20222"
-"MAN 660 CSR Video Documentaries","6","20151","20202"
-"MAN 661 Startery University - Social Entrepreneurship Seminar","2","20162","20192"
-"MAN 663 Digital Social Innovation Lab with SocEnt BW and SAP","3","20172","20202"
-"MAN 664 Sustainability Games","1","20192","20212"
-"MAN 667 Social Impact Measurement","1","20192","20212"
-"MAN 672 Nonprofit Management","10","20111","20161"
-"MAN 676 AusgewÃ¤hlte Herausforderungen im Public Management","1","20182","20211"
-"MAN 677 International Business Strategy","1","20121","20151"
-"MAN 678 Strategy of Technological Oriented New Ventures","3","20121","20161"
-"MAN 679 Eine wissenschaftliche EinfÃ¼hrung in das Public und Nonprofit Management","4","20171","20202"
-"MAN 685 Purpose & Strategic Corporate Social Responsibility","2","20202","20222"
-"MAN 690 Innovation Management","82","20151","20222"
-"MAN 691 Selected Topics in Organizational Behavior","16","20161","20222"
-"MAN 692 Organisationstheorie","1","20212","20222"
-"MAN 693 Strategic Intellectual Property Management","4","20181","20222"
-"MAN 742 High Performance Leadership","1","20132","20161"
-"MAN 770 Research seminar on Small and Medium Sized Companies and Entrepreneurship","1","20112","20141"
-"Management","2","20102","20132"
-"Marketing","5","20102","20142"
-"Mindmapping","4","20102","20151"
-"MKT 351 Marketing Management Decisions","6","20102","20152"
-"MKT 352 Social Media Marketing","1","20121","20161"
-"MKT 401 Marketing II","5","20102","20151"
-"MKT 510 Price and Product Management","226","20102","20222"
-"MKT 511 Marketing Analytics","112","20182","20222"
-"MKT 520 Market Research","136","20102","20222"
-"MKT 531 Marketing Theory","92","20102","20222"
-"MKT 531 Marketing Theory: Consumer Behavior and Decision Making","99","20102","20222"
-"MKT 532 Kommunikationsmanagement","16","20102","20151"
-"MKT 540 Marketing Strategy","26","20101","20162"
-"MKT 545 Customers, Markets and Firm Strategy","195","20112","20222"
-"MKT 560 Services Marketing","38","20112","20222"
-"MKT 570 Marketing of Innovations","2","20211","20222"
-"MKT 580 Digital Marketing Strategy","22","20152","20222"
-"MKT 611 Sales Management and Customer Relationship Management","48","20112","20211"
-"MKT 612 Business-to-Business-Marketing","77","20112","20222"
-"MKT 613 VerhandlungsfÃ¼hrung","13","20192","20222"
-"MKT 614 Marketing Communication","60","20112","20222"
-"MKT 615 Sales Management","1","20202","20222"
-"MKT 621 Global Marketing","25","20121","20201"
-"MKT 622 Country Manager","26","20111","20211"
-"MKT 623 Strategic Marketing Management Simulation","2","20192","20222"
-"MKT 632 Value-Based Marketing","39","20111","20222"
-"MKT 650 Marktorientierte UnternehmensfÃ¼hrung","20","20111","20171"
-"MKT 661 Consumer Behavior","56","20111","20222"
-"MKT 662 Interactive Marketing","142","20112","20222"
-"MKT 663 Branding and Brand Management","129","20121","20222"
-"MKT 664 Brand Strategy Seminar","6","20192","20222"
-"Mnemonik und GedÃ¤chtnistraining","9","20101","20132"
-"MS 600 Kodierungstheorie","2","20102","20132"
-"OPM 301 Operations Management","1","20102","20121"
-"OPM 350 Production and Operations Management","3","20102","20161"
-"OPM 501 Logistics Management","159","20102","20222"
-"OPM 502 Inventory Management","106","20101","20222"
-"OPM 502 Supply Chain Analytics: Inventory Management","106","20101","20222"
-"OPM 503 Transportation I - Land Transport and Shipping","13","20112","20222"
-"OPM 504 Transportation II: Air Transport","15","20112","20222"
-"OPM 504 Transportation Management: Aviation","15","20112","20222"
-"OPM 510 Sustainable Operations","6","20202","20222"
-"OPM 540 Quantitative Methods in Operations Management","2","20102","20121"
-"OPM 541 Produktionsmanagement","4","20102","20131"
-"OPM 542 System Dynamics: Systemdenken und Systemsimulation","2","20102","20131"
-"OPM 543 Procurement","4","20102","20141"
-"OPM 544 Advanced Supply Chain Planning","16","20102","20222"
-"OPM 545 Cases on Current Issues in Supply Chain Management","1","20171","20201"
-"OPM 546 Innovation Management & Operations","2","20132","20201"
-"OPM 561 Production Management: Lean Approaches and Variability","115","20112","20222"
-"OPM 565 Integrierte Produktentwicklung","8","20112","20202"
-"OPM 581 Service Operations Management","159","20112","20222"
-"OPM 582 Case Studies in Service Operations Management","4","20151","20212"
-"OPM 583 Decision-making with Limited Information","1","20131","20161"
-"OPM 591 Strategic Procurement","4","20152","20211"
-"OPM 599 Procurement Governance and Compliance","1","20131","20161"
-"OPM 601 Supply Chain Management","41","20102","20222"
-"OPM 661 Business Analytics: Robust Planning in Stochastic Systems","15","20112","20222"
-"OPM 662 Business Analytics: Modeling and Optimization","8","20112","20222"
-"OPM 682 Revenue Management","16","20122","20222"
-"OPM 691 Supply Risk Management","1","20212","20222"
-"OPM 692 Strategic Sourcing","1","20122","20152"
-"OPM 701 Research Seminar Supply Chain Management","1","20122","20151"
-"Produktion","4","20102","20142"
-"Project Management","3","20101","20142"
-"Psychologie der Interaktion und Kommunikation","8","20101","20131"
-"Rhetorik kompakt","1","20102","20122"
-"SchlÃ¼sselqualifikation I","1","20102","20132"
-"Selbsterkenntnis und Selbstoptimierung","2","20102","20122"
-"Selbstmanagement","3","20102","20132"
-"Seminar","123","20101","20171"
-"Seminar: Introduction to Predictive Analytics and Machine Learning","1","20221","20222"
-"SM 441 Seminar","1","20112","20141"
-"Social Skills: Business Etikette International Dos and DonÂ´ts","2","20102","20132"
-"Speedreading","1","20102","20132"
-"SQ 500 Scientific Research","1106","20101","20222"
-"TAX 350 International Taxation","7","20102","20152"
-"TAX 510 Grundlagen der Besteuerung","13","20102","20202"
-"TAX 520 Besteuerung der Unternehmen","5","20102","20221"
-"TAX 521 Fallstudien zur Besteuerung der Unternehmen","3","20201","20221"
-"TAX 530 Taxation of Businesses and Individuals","12","20102","20222"
-"TAX 610 Internationale Unternehmensbesteuerung","1","20121","20151"
-"TAX 630 International Business Taxation","1","20102","20132"
-"TAX 650 European Business Taxation","1","20121","20151"
-"TAX 660 Tax Planning: The Role of Taxes for Business Decisions","2","20192","20222"
-"Teamprojekt","1","20141","20161"
-"Teamwork in the global context","5","20101","20131"
-"TeamÂ² - durch Methoden fÃ¼r KreativitÃ¤t und Innovation die Team-EffektivitÃ¤t steigern","1","20101","20122"
-"TP 500 Team Project","1117","20101","20222"
-"Ãœ Projektmanagement","7","20102","20132"
-"Ãœ TeamfÃ¤higkeit? KonfliktfÃ¤higkeit?... Soziale Kompetenzen erwerben und weiterentwickeln","2","20102","20131"
-"Unternehmensplanspiel","6","20101","20132"
-"Verhandlungsseminar","1","20102","20132"
+Course
+- Kommunikationspolitik
+- Marketingtheorie
+ACC 350 International Accounting [engl. Exp.]
+ACC 510 Jahresabschluss
+ACC 511 Konzernrechnungslegung
+ACC 520 IFRS Reporting and Capital Markets
+ACC 531 Unternehmensbewertung
+ACC 532 Financial Statement Analysis & Equity Valuation
+ACC 540 Financial Statement Analysis & Equity Valuation
+ACC 551 Controlling
+ACC 552 Wertorientiertes Controlling in der Unternehmenspraxis
+ACC 553 Controlling
+ACC 554 Internationales Konzerncontrolling
+ACC 571 Prüfungslehre und -praxis
+ACC 574 Business Opportunities in the Clean Energy Transition
+ACC 620 Accounting for Financial Instruments & Financial Institutions
+ACC 625 Practical Aspects of M&A Processes
+ACC 627 Fallstudien 'Beratung von Finanzdienstleistern'
+ACC 630 Integriertes Controlling 1 - Planung und Budgetierung
+ACC 631 Integriertes Controlling 2 - Reporting und Performancesteuerung
+ACC 636 Fallstudien für das wertorientierte Risiko-Controlling und -Management im Bankbereich
+ACC 653 Kostenmanagement und - analyse
+ACC 670 Audit Theory
+ACC 672 Corporate Governance Theorie
+BI 651 International Course - Information Technology
+BI 652 International Course - System Design and Development
+BI 653 International Course - Enterprise Applications
+BI 654 International Course - Data and Web Science
+BI 654 Professional Content Management Systems
+Burnout Präventation
+Business Etikette - internationale Do's und Don'ts
+Business Model Innovation
+CC 501 Decision Analysis: Business Analytics II
+CC 503 Empirical Methods: Business Analytics I
+Core skills for young professionals
+Corporate Social Responsibility
+Corporate Strategy
+CS 302 Praktische Informatik I
+CS 307 Algorithmen und Datenstrukturen
+CS 500 Advanced Software Engineering
+CS 530 Database Systems II
+CS 540 Advanced Computer Networks
+CS 550 Algorithmics
+CS 560 Large-Scale Data Management
+CS 600 Model Driven Development
+CS 604 Resilient Networking
+CS 605 GPU Programming
+CS 610 Principles of Dependables Systems
+CS 620 Design of Reliable Systems
+CS 621 Logikprogrammierung
+CS 631 Transaktionssysteme
+CS 640 Multimedia Technology
+CS 642 Image and Video Processing
+CS 643 Embedded Systems for Industrial Applications
+CS 644 Computer Graphics
+CS 645 Computer Games
+CS 646 Higher Level Computer Vision
+CS 647 Image Processing
+CS 649 Secure Programming
+CS 650 Algorithmik II
+CS 651 Cryptography II
+CS 651 Kryptographie II
+CS 652 Data Security
+CS 653 Practical Applications of Cryptography
+CS 654 Internet of Things Security
+CS 655 Cryptography
+CS 660 Compiler Construction
+CS 661 Parallel Programming
+CS 663 Information Retrieval and Web Search
+CS 665 Selected Topics in IT-Security
+CS 667 Computer Vision
+CS 669 Design of Reliable and Dependable Systems
+CS 701 Selected Topics in Algorithmics and Cryptography
+CS 703 Data Analytics Seminar
+CS 704 Master Seminar Artificial Intelligence
+CS 705 Datenbankseminar
+CS 706 Seminar
+CS 707 Seminar Data and Web Science
+CS 708 Seminar Software Engineering
+CS 709 Seminar Text Analytics
+CS 710 Seminar Selected Topics in Data Science
+CS 711 Intelligent Software Infrastructures - Processes, Methods and Technologies
+CS 714 Seminar
+CS 715 Large-Scale Data Integration Seminar
+CS 716 Seminar IT-Security
+CS 717 Master Seminar on Computer Vision
+CS 718 AI and Data Science in Fiction and Society
+CS 719 Seminar on Process Analysis
+CS 721 Seminar Data-Science I
+Didaktik wirtschaftsethischen Argumentierens
+Diversity Management
+Dummy 1
+Dummy 10
+Dummy 2
+Dummy 3
+Dummy 4
+Dummy 5
+Dummy 6
+Dummy 7
+Dummy 8
+Dummy 9
+Durchsetzungsfähigkeit und Verhandlungstechnik - Beruflich und Privat erfolgreich kommunizieren
+E-Government: Implikationen, Wirkungsweisen und E-Democracy
+Entscheidungspsychologie
+FIN 500 Investments
+FIN 520 Bankbetriebslehre
+FIN 540 Corporate Finance I - Lecture (Capital Structure, Cost of Capital and Valuation)
+FIN 541 Corporate Finance I - Case Study (Capital Structure, Cost of Capital and Valuation)
+FIN 560 Risikomanagement von Versicherungsunternehmen
+FIN 561 Investmentmanagement von Versicherungsunternehmen
+FIN 580 Derivatives I - Basic Strategies and Pricing
+FIN 590 Financial Institutions I
+FIN 601 Bond Markets
+FIN 602 Trading and Exchanges
+FIN 620 Behavioral Finance
+FIN 630 Corporate Governance
+FIN 660 Quantitatives Risikomanagement
+FIN 682 International Asset Management
+Finanzwirtschaft
+Fit für den öffentlichen Auftritt
+Great Presentation Now! A practical toolkit for effectiveness and confidence
+IE 500 Data Mining I
+IE 550 Knowledge Management: Principles and Technologies
+IE 560 Decision Support
+IE 630 Query Optimization
+IE 650 Semantic Web Technologies
+IE 660 Artificial Intelligence
+IE 661 Text Analytics
+IE 663 Information Retrieval and Web Search
+IE 664 Process Mining
+IE 670 Web Data Integration
+IE 671 Web Mining
+IE 672 Data Mining II
+IE 673 Data Mining and Matrices
+IE 674 Hot Topics in Machine Learning
+IE 675 Machine Learning
+IE 675b Machine Learning
+IE 676 Network Analysis
+IE 678 Deep Learning
+IE 680 Human-Computer-Interaction: Fundamentals and Research Methods
+IE 681 Interactive Multimedia Systems
+IE 682 Enterprise Architecture Modeling
+IE 683 Web Data Integration Project
+IE 684 Web Mining Project
+IE 689 Relational Learning
+IE 690 Information Architecture
+IE 691 Information Retrieval Project
+IE 692 Advanced Process Mining
+IE 694 Artificial Intelligence Applications in Industry
+IE 704 Seminar AI Systems Engineering
+Improvisationstraining
+Interdisziplinäres Kulturmanagement
+Interkulturelle Sensibilisierung
+International Business Negotiations and Assertiveness - Getting results in business and life
+International Course I
+International Course II
+International Course III
+IS 203 Wirtschaftsinformatik III: Development and Management of Information Systems
+IS 204 Wirtschaftsinformatik IV
+IS 401 Integrated Information Systems
+IS 500 E-Business and Electronic Markets
+IS 510 Process Management
+IS 511 Information Resource Management
+IS 512 IT Management in the Digital Age
+IS 513 Applied IT Management in the Digital Age
+IS 514 Process Mining and Analytics
+IS 515 Process Management & Analytics
+IS 520 Advanced Middleware
+IS 530 Component Based Systems
+IS 540 Management of Enterprise Systems
+IS 541 Theories and Methods in Information Systems
+IS 551 Foundations of Data Management
+IS 553 System Software
+IS 556 Public Blockchains
+IS 600 E-Government: Methoden, Technologien und Prozesse
+IS 601 Cloud Computing: Technologies, Applications, Services and Implications
+IS 602 Business Intelligence and Business Analytics Systems
+IS 603 User Productivity
+IS 604 Contemporary Issues in Enterprise Systems: Banking Enterprise Systems
+IS 605 IT-Driven Government Modernization: International Case Studies
+IS 606 Strategies for Electronic Commerce
+IS 607 Digital Innovation
+IS 610 Information Resource Management
+IS 611 Case Studies in Information Systems
+IS 612 Banking und IT-Management
+IS 613 Applied Project in Design Thinking and Lean Software Development
+IS 613 Applied Project in Enterprise Cloud Design and Development
+IS 614 Corporate Knowledge Management
+IS 615 - Enterprise Cloud Design and Development
+IS 615 Design Thinking and Lean Development in Enterprise Software Development
+IS 620 Distributed Virtual Environments
+IS 621 Internet Technologies
+IS 621 Self-Organizing and Adaptive Systems
+IS 622 Mobile Computing
+IS 622 Network Science
+IS 624 Mobile Computing
+IS 625 Pervasive Computing
+IS 626 Distributed Virtual Environments
+IS 627 Self-organizing Systems
+IS 629 Agile Software Product Management and Design
+IS 630 Machine Learning
+IS 631 Component Data Management
+IS 632 Supply Chain Management
+IS 633 E-Commerce
+IS 651 Behavioral Perspectives on E-Business
+IS 666 E-Commerce
+IS 702 Seminar E-Business & E-Government
+IS 712 Seminar
+IS 722 Seminar Trends in Distributed Systems
+IS 732 Seminar
+IS 742 Seminar Trends in Enterprise Systems
+IS 751 E-Government Adoption
+IS 752 Seminar on Process and Management Analytics
+IS/MAN 500 Information Systems in Organizations
+IS/MKT 500 E-Business and Electronic Markets
+Kolloquium
+Kommunikation und Mediation im internationalen Kontext
+Konflikte-Chance oder /Risiko
+Körpersprache
+Kultinational - Leben und Arbeiten im interkulturellen Kontext
+Kunst der Debatte
+Kunst der Rede
+Kwerkarriere (die Karriere-Mechanik, Alternativen, wie bringt es wer zur Elite)
+Literature, Business and Economics
+MAN 301 Strategic and International Management
+MAN 356 Strategy and Innovation
+MAN 401 Organization and Human Resources Management
+MAN 500 Advanced Management Studies
+MAN 611 Management öffentlicher Dienstleistungen
+MAN 613 New Public Management
+MAN 616 Branchenspezifische Herausforderungen im Nonprofit Management
+MAN 621 Organisationsgestaltung
+MAN 622 Verhalten in Organisationen
+MAN 625 Organizational Structures Within and Between Firms
+MAN 627 Organizational Design and Technology
+MAN 628 Organizational Theory and Design
+MAN 629 Organization for Innovation
+MAN 630 Introduction to Entrepreneurship
+MAN 631 Creativity and Entrepreneurship in Practice
+MAN 632 Advanced Entrepreneurship
+MAN 633 Entrepreneurial Spirit
+MAN 635 Social Entrepreneurship: Targeting Social Capital through Ecopreneurship
+MAN 636 International Entrepreneurship and Managing Change
+MAN 640 HR Performance Management
+MAN 641 Human Capital Management
+MAN 642 International Human Resource Management & Employment Relations
+MAN 644 Human Resource Training and Development
+MAN 645 Leadership and Motivation
+MAN 646 HR Analytics
+MAN 647 Strategic and International Human Resource Management
+MAN 648 Incentives and Performance
+MAN 649 Human Resource Recruitment and Selection
+MAN 650 International Management I
+MAN 651 Strategic Management I
+MAN 652 Strategic Management II
+MAN 654 Corporate Restructuring
+MAN 655  Corporate Strategy: Managing Business Groups
+MAN 656 Mergers & Acquisitions
+MAN 657 Global Strategic Management
+MAN 660 CSR Video Documentaries
+MAN 661 Startery University - Social Entrepreneurship Seminar
+MAN 663 Digital Social Innovation Lab with SocEnt BW and SAP
+MAN 664 Sustainability Games
+MAN 667 Social Impact Measurement
+MAN 672 Nonprofit Management
+MAN 676 Ausgewählte Herausforderungen im Public Management
+MAN 677 International Business Strategy
+MAN 678 Strategy of Technological Oriented New Ventures
+MAN 679 Eine wissenschaftliche Einführung in das Public und Nonprofit Management
+MAN 685 Purpose & Strategic Corporate Social Responsibility
+MAN 690 Innovation Management
+MAN 691 Selected Topics in Organizational Behavior
+MAN 693 Strategic Intellectual Property Management
+MAN 770 Research seminar on Small and Medium Sized Companies and Entrepreneurship
+Management
+Marketing
+Mindmapping
+MKT 351 Marketing Management Decisions
+MKT 352 Social Media Marketing
+MKT 401 Marketing II
+MKT 510 Price and Product Management
+MKT 511 Marketing Analytics
+MKT 520 Market Research
+MKT 531 Marketing Theory
+MKT 531 Marketing Theory: Consumer Behavior and Decision Making
+MKT 532 Kommunikationsmanagement
+MKT 540 Marketing Strategy
+MKT 545 Customers, Markets and Firm Strategy
+MKT 560 Services Marketing
+MKT 570 Marketing of Innovations
+MKT 580 Digital Marketing Strategy
+MKT 611 Sales Management and Customer Relationship Management
+MKT 612 Business-to-Business-Marketing
+MKT 613 Verhandlungsführung
+MKT 614 Marketing Communication
+MKT 615 Sales Management
+MKT 621 Global Marketing
+MKT 622 Country Manager
+MKT 623 Strategic Marketing Management Simulation
+MKT 632 Value-Based Marketing
+MKT 650 Marktorientierte Unternehmensführung
+MKT 661 Consumer Behavior
+MKT 662 Interactive Marketing
+MKT 663 Branding and Brand Management
+MKT 664 Brand Strategy Seminar
+Mnemonik und Gedächtnistraining
+MS 600 Kodierungstheorie
+OPM 301 Operations Management
+OPM 350 Production and Operations Management
+OPM 501 Logistics Management
+OPM 502 Inventory Management
+OPM 502 Supply Chain Analytics: Inventory Management
+OPM 503 Transportation I - Land Transport and Shipping
+OPM 504 Transportation II: Air Transport
+OPM 504 Transportation Management: Aviation
+OPM 510 Sustainable Operations
+OPM 540 Quantitative Methods in Operations Management
+OPM 541 Produktionsmanagement
+OPM 542 System Dynamics: Systemdenken und Systemsimulation
+OPM 543 Procurement
+OPM 544 Advanced Supply Chain Planning
+OPM 545 Cases on Current Issues in Supply Chain Management
+OPM 546 Innovation Management & Operations
+OPM 561 Production Management: Lean Approaches and Variability
+OPM 565 Integrierte Produktentwicklung
+OPM 581 Service Operations Management
+OPM 582 Case Studies in Service Operations Management
+OPM 583 Decision-making with Limited Information
+OPM 591 Strategic Procurement
+OPM 599 Procurement Governance and Compliance
+OPM 601 Supply Chain Management
+OPM 661 Business Analytics: Robust Planning in Stochastic Systems
+OPM 662 Business Analytics: Modeling and Optimization
+OPM 682 Revenue Management
+OPM 692 Strategic Sourcing
+OPM 701 Research Seminar Supply Chain Management
+Produktion
+Project Management
+Psychologie der Interaktion und Kommunikation
+Rhetorik kompakt
+Selbsterkenntnis und Selbstoptimierung
+Selbstmanagement
+Seminar
+SM 441 Seminar
+Social Skills: Business Etikette International Dos and Don´ts
+Speedreading
+SQ 500 Scientific Research
+TAX 350 International Taxation
+TAX 510 Grundlagen der Besteuerung
+TAX 520 Besteuerung der Unternehmen
+TAX 521 Fallstudien zur Besteuerung der Unternehmen
+TAX 530 Taxation of Businesses and Individuals
+TAX 650 European Business Taxation
+TAX 660 Tax Planning: The Role of Taxes for Business Decisions
+Teamprojekt
+Teamwork in the global context
+Team² - durch Methoden für Kreativität und Innovation die Team-Effektivität steigern
+TP 500 Team Project
+Ü Projektmanagement
+Ü Teamfähigkeit? Konfliktfähigkeit?... Soziale Kompetenzen erwerben und weiterentwickeln
+Unternehmensplanspiel
+Verhandlungsseminar

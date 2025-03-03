@@ -7,7 +7,7 @@ import sqlite3
 G_Bachelor = nx.read_graphml("CourseSkillGraph_Bachelor.graphml")
 G_Master = nx.read_graphml("CourseSkillGraph_Master.graphml")
 
-# Hier die Pfade zu den csv Dateien eingeben
+#Create paths to csv files
 studium_csv = "path"
 pruefungsleistung_csv = "path"
 
@@ -21,13 +21,13 @@ conn.close()
 
 #Creation of course -> skill weights
 #Bachelor
-#weights = gcB.getCourseSkillWeights(G_Bachelor, database, 0.1)
-#df = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count with Course", "Count without Course"])
-#df.to_excel("CourseSkillWeights_Bachelor.xlsx", index = False)
+weights = gcB.getCourseSkillWeights(G_Bachelor, database, 0.1)
+df = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count with Course", "Count without Course"])
+df.to_excel("CourseSkillWeights_Bachelor.xlsx", index = False)
 #Master
-#weights = gcM.getCourseSkillWeights(G_Master, database, 0.1)
-#df = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count with Course", "Count without Course"])
-#df.to_excel("CourseSkillWeights_Master.xlsx", index = False)
+weights = gcM.getCourseSkillWeights(G_Master, database, 0.1)
+df = pd.DataFrame(weights, columns=["Weight", "Outgoing", "Ingoing", "Count with Course", "Count without Course"])
+df.to_excel("CourseSkillWeights_Master.xlsx", index = False)
 
 
 #Creation of skill -> course weights

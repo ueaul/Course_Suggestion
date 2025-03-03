@@ -3,7 +3,7 @@ import re
 import networkx as nx
 import sqlite3
 
-
+#Construct the course name based on the first row of the DataFrame representing the course
 def getCourseName(course):
     course_name = ""
 
@@ -18,6 +18,7 @@ def getCourseName(course):
 
     return course_name
 
+#Mapping from the course names in the graph to the course names in the database
 def mapGraphToDB_courseName(course_name):
     if isinstance(course_name, pd.DataFrame):
         course_name = getCourseName(course_name)
@@ -47,6 +48,7 @@ def mapGraphToDB_courseName(course_name):
     else:
         return course_name
 
+#Mapping from the course names in the database to the course names in the graph
 def mapDBtoGraph_courseName(course_name):
     if isinstance(course_name, pd.DataFrame):
         course_name = getCourseName(course_name)
@@ -76,6 +78,7 @@ def mapDBtoGraph_courseName(course_name):
     else:
         return course_name
 
+#Reconstructs the full course name by matching a search string to a list of course names
 def getFullCourseName(searchString, courseNames):
     for courseName in courseNames:
         if searchString in courseName:
@@ -83,6 +86,7 @@ def getFullCourseName(searchString, courseNames):
 
     return ""
 
+#Extracts the course names that match the search string and not match the main course
 def getMatchingCourses(searchString, courseNames, mainCourse):
     matchingCourses = []
     for courseName in courseNames:
@@ -91,6 +95,7 @@ def getMatchingCourses(searchString, courseNames, mainCourse):
 
     return matchingCourses
 
+#Extract the information for the construction of the course nodes from the DataFrames representing the courses
 def getCourseNodes(courses):
     nodes = []
 
@@ -111,7 +116,8 @@ def getCourseNodes(courses):
 
     return nodes
 
-
+#Constructs the course -> skill edges of all courses of the Mannheim Master in Management based on their corresponding
+#area except for the IS courses
 def addBWLEdges(courses):
     additional_edges = []
 
@@ -135,7 +141,7 @@ def addBWLEdges(courses):
 
 
 
-
+#Create all edges representing prerequiste relationships as well as the skill -> course edges
 def complete_edges(courses, edges):
     df_bwl_edges = pd.DataFrame(addBWLEdges(courses), columns=["Outgoing", "Ingoing"])
 
@@ -205,7 +211,7 @@ def complete_edges(courses, edges):
                                 matching_courses = getMatchingCourses(equivalent_course, course_names, course_name)
                                 for matching_course in matching_courses:
                                     if not gate_created:
-                                        helper_nodes.append(["MIN " + str(prerequisite_index), "white", "prerequisite", "MIN", 1])
+                                        helper_nodes.append(["MIN " + str(prerequisite_index), "yellow", "prerequisite", "MIN", 1])
                                         additional_edges.append(["MIN " + str(prerequisite_index), course_name, 1])
                                         gate_created = True
                                     additional_edges.append([matching_course, "MIN " + str(prerequisite_index), 1])
@@ -241,6 +247,7 @@ def complete_edges(courses, edges):
 
     return additional_edges, helper_nodes
 
+#Extract all edges where the connected nodes have a certain value for one of their attributes
 def getFilteredEdges(graph, outgoing_node_attribute, ingoing_node_attribute, outgoing_node_value, ingoing_node_value):
     filteredEdges = []
 
@@ -251,7 +258,7 @@ def getFilteredEdges(graph, outgoing_node_attribute, ingoing_node_attribute, out
 
     return filteredEdges
 
-
+#Script for weighting the course -> skill edges
 def getCourseSkillWeights(graph, database, min):
     course_skill_edge_weights = []
 
@@ -344,6 +351,7 @@ def getCourseSkillWeights(graph, database, min):
 
     return course_skill_edge_weights
 
+#Script for weighting the skill -> course edges
 def getSkillCourseWeights(graph, database):
     course_names_graph = list(graph.nodes())
 

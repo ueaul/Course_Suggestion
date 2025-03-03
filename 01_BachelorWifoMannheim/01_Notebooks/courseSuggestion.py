@@ -5,7 +5,6 @@ import pandas as pd
 from itertools import combinations
 import time
 import numpy as np
-from pyomo.environ import *
 
 
 
@@ -20,14 +19,17 @@ skill_list = ["Software Development Fundamentals (SDF)", "Algorithmic Foundation
               "Management (MAN)", "Marketing and Sales (MKT)", "Operations Management (OPM)", "IT Management (ITM)",
               "Economics (ECO)", "Law (LAW)", "Scientific Work (SW)", "Business Process Management (BPM)"]
 
-pool_names = ["Information Systems", "Computer Science", "Mathematics and Statistics", "Specialization",
-         "Key Qualification", "Key Qualification Pool", "Seminar", "Thesis", "Business", "Elective"]
+pool_names = ["Fundamentals Information Systems", "Fundamentals Computer Science", "Fundamentals Mathematics and Statistics", "Specialization Courses",
+         "Key Qualifications", "Key Qualifications Pool", "Seminars", "Thesis", "Fundamentals Business Administration", "Elective Courses"]
 
+#ECTS needed for each course pool
 pool_ECTS = [24, 57, 25, 12, 5, 4, 5, 12, 30, 6]
+
+default_weights = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
 required_skill_levels = {}
 
-
+#Initializes the dictionary required_skill_levels that contains the recommended skill levels for each course
 def initialize(graph):
     courses = [course for course in graph.nodes() if graph.nodes[course].get("type") == "course"]
     for course in courses:
@@ -39,6 +41,7 @@ def initialize(graph):
                     required_skill_levels[course] = {}
                 required_skill_levels[course][potential_skill] = graph.edges[edge].get("weight")
 
+#Check if a list of courses contains courses that exclude taking each other
 def checkExclusive(graph, courses):
     excluded_courses = {
         edge[0]
@@ -48,7 +51,8 @@ def checkExclusive(graph, courses):
     }
     return not any(course in excluded_courses for course in courses)
 
-
+#Checks if a course can be taken in the current status of the graph. If courses need to be taken in parallel, they
+#are also returned by the method as "checkedNodes"
 def getCourseAvailability(graph, course, checkedNodes, cycle):
     if not graph.nodes[course].get("type") == "course":
         return False, checkedNodes
@@ -78,7 +82,7 @@ def getCourseAvailability(graph, course, checkedNodes, cycle):
 
     return available, checkedNodes
 
-
+#Check if enough ECTS points are left to fulfill the requirements of the course pools if the courses are taken
 def checkEnoughECTS(graph, current_ECTS, pool_ECTS_left, courses, max_ECTS):
     pool_ECTS_left_copy = pool_ECTS_left.copy()
     current_ECTS_copy = current_ECTS
@@ -105,7 +109,8 @@ def checkEnoughECTS(graph, current_ECTS, pool_ECTS_left, courses, max_ECTS):
     return max_ECTS - current_ECTS_copy >= ECTS_left
 
 
-
+#Checks how many ECTS points are still required by each course pool in the current status of the graph. Also returns
+#the number of ECTS points already acquired in the current status of the graph
 def getCurrentECTSLeft(graph):
     active_courses = [course for course in graph.nodes() if graph.nodes[course].get("active") == True and
                         graph.nodes[course].get("type") == "course"]
@@ -133,7 +138,8 @@ def getCurrentECTSLeft(graph):
     return pool_ECTS_left, current_ECTS
 
 
-
+#Returns all courses available in the current status of the graph and cycle. Also returns the ECTS points still required
+#for each course pool and the number of already acquired ECTS points
 def getAvailailableCourses(graph, max_ECTS, cycle, courses =[]):
     available_courses = []
     if courses:
@@ -142,7 +148,6 @@ def getAvailailableCourses(graph, max_ECTS, cycle, courses =[]):
     else:
         inactive_courses = [course for course in graph.nodes() if graph.nodes[course].get("active") == False and
                             graph.nodes[course].get("type") == "course"]
-    #skill_levels = getSkillLevelsGraph(graph)
     pool_ECTS_left, current_ECTS = getCurrentECTSLeft(graph)
     for course in inactive_courses:
         available, parallelCourses = getCourseAvailability(graph, course, [course], cycle)
@@ -150,6 +155,7 @@ def getAvailailableCourses(graph, max_ECTS, cycle, courses =[]):
             available_courses.append(parallelCourses)
     return available_courses, pool_ECTS_left, current_ECTS
 
+#Computes the skill levels acquired in the current status of the graph
 def getSkillLevelsGraph(graph):
     active_courses = [course for course in graph.nodes() if graph.nodes[course].get("active") == True and
                         graph.nodes[course].get("type") == "course"]
@@ -164,20 +170,8 @@ def getSkillLevelsGraph(graph):
 
     return(skill_levels)
 
-def getSkillLevelsCourse(graph, courses):
-    skill_levels = []
-    for course in courses:
-        skill_levels_course = [0] * len(skill_list)
-        outgoing_edges = graph.out_edges(course)
-        for edge in outgoing_edges:
-            potential_skill = edge[1]
-            if potential_skill in skill_list:
-                skill_levels_course[skill_list.index(potential_skill)] += graph.edges[edge].get("weight")
-        skill_levels.append(skill_levels_course)
-
-    return(skill_levels)
-
-
+#Checks if taking the course leads to the fulfillment of any complex prerequiste relationships and activates the
+#prerequiste nodes accordingly
 def activatePrerequisiteNodes(graph, course):
     courses = [course]
     while (len(courses) > 0):
@@ -216,7 +210,7 @@ def activatePrerequisiteNodes(graph, course):
     return graph
 
 
-
+#Calculate penalty applied when taking the course
 def getPenalty(course, skill_level_graph):
     if course not in required_skill_levels:
         return 1
@@ -230,6 +224,7 @@ def getPenalty(course, skill_level_graph):
 
     return (actual_skill / required_skill) if required_skill > 0 else 1
 
+#Calculate the reward function
 def calculateRewardFunctionWithPenalty(courses, course_rewards, skill_level_graph):
     if not courses:
         return 0
@@ -239,10 +234,27 @@ def calculateRewardFunctionWithPenalty(courses, course_rewards, skill_level_grap
         for course in courses
     )
 
+#Calculate the reward function individually for each skill
+def calculateSkillRewardFunctionWithPenalty(graph, courses, weights):
+    skill_rewards = [0] * len(skill_list)
+    skill_level_graph = getSkillLevelsGraph(graph)
 
+    for course in courses:
+        outgoing_edges = [edge for edge in graph.out_edges(course) if graph.nodes[edge[1]].get("type") == "skill"]
+        penalty = getPenalty(course, skill_level_graph)
+        for edge in outgoing_edges:
+            potential_skill = edge[1]
+            skill_index = skill_list.index(potential_skill)
+            skill_rewards[skill_index] += penalty * graph.edges[edge].get("weight") * weights[skill_index]
+
+    return skill_rewards
+
+#Activate the courses in the graph
 def takeCourses(graph, courses, cycle):
     for course in courses:
-        if not getCourseAvailability(graph, course, [course], cycle)[0]:
+        available, parallelCourses = getCourseAvailability(graph, course, [course], cycle)
+        if not available or not all(elem in courses for elem in parallelCourses):
+            print(course)
             print("Incorrect Input, one ore more courses not available")
             break
     for course in courses:
@@ -250,6 +262,7 @@ def takeCourses(graph, courses, cycle):
         graph = activatePrerequisiteNodes(graph, course)
     return graph
 
+#Check if taking the courses in the semester is valid in the current status of the graph and cycle
 def getSemesterValidPartial(graph, semester, courses, cycle):
     valid_swap = True
     for course in courses:
@@ -262,6 +275,7 @@ def getSemesterValidPartial(graph, semester, courses, cycle):
                     valid_swap = False
     return valid_swap
 
+#Check if the semester plan is valid in the current status of the graph and cycle
 def getSemesterValid(graph, semester, cycle):
     valid_swap = True
     for course in semester:
@@ -276,6 +290,8 @@ def getSemesterValid(graph, semester, cycle):
                     break
     return valid_swap
 
+#Compute the possibilites of moving the course / courses to a later semester or swapping them with a course / courses of
+#a later semester
 def getSwapPossibilities(graph, start, semester_plan, max_semester_ECTS, course_ECTS,
                          step_size, start_cycle, courses):
     swap_possibilities = []
@@ -307,6 +323,7 @@ def getSwapPossibilities(graph, start, semester_plan, max_semester_ECTS, course_
 
     return swap_possibilities
 
+#Check if the courses contain courses that must be taken in parallel
 def getParallelCourses(graph, courses):
     parallel_courses = []
     courses_to_skip = set()
@@ -325,6 +342,8 @@ def getParallelCourses(graph, courses):
             else:
                 parallel_courses.append([course])
     return parallel_courses
+
+#Get the offering cycle in which all of the courses can be taken
 def getParallelCycle(graph, courses):
     cycle = None
     for course in courses:
@@ -333,7 +352,7 @@ def getParallelCycle(graph, courses):
             break
     return cycle
 
-
+#Calculate the accumulated course -> skill weights of all courses in the graph based on the provided weight list
 def getCourseRewards(graph, weights):
     courseRewards = {}
     courses = [course for course in graph.nodes() if graph.nodes[course].get("type") == "course"]
@@ -353,6 +372,7 @@ def getCourseRewards(graph, weights):
 
     return courseRewards
 
+#Greedy course selection phase
 def courseSuggestionGreedy(graph, max_semester_ECTS, max_ECTS, startCycle, courseRewards):
     current_ECTS = 0
     bestSemesterPlan = []
@@ -371,6 +391,7 @@ def courseSuggestionGreedy(graph, max_semester_ECTS, max_ECTS, startCycle, cours
 
     return bestSemesterPlan, current_ECTS
 
+#Greedy calculation of the best semester plan in the current status of the graph and cycle
 def getBestSemesterPlan(graph, max_semester_ECTS, max_ECTS, cycle, course_rewards, successors = []):
     availableCourses, pool_ECTS_left, current_ECTS = getAvailailableCourses(graph, max_ECTS, cycle)
     available_courses_with_reward = []
@@ -396,12 +417,14 @@ def getBestSemesterPlan(graph, max_semester_ECTS, max_ECTS, cycle, course_reward
     best_semester_plan_ECTS = sum(int(graph.nodes[course].get("ECTS")) for course in best_semester_plan)
     return [best_semester_plan, best_semester_plan_ECTS]
 
+#Optimization Phase
 def optimizeCourseSuggestion(graph, max_semester_ECTS, course_rewards, semester_plan,
-                             start_cycle, stop_criterion):
+                             start_cycle):
 
     optimized_plan = copy.deepcopy(semester_plan)
 
-    for loop in range(stop_criterion):
+    iterations = 0
+    while True:
         old_plan_reward = getPlanReward(graph, optimized_plan, start_cycle, course_rewards)[0]
         graph_copy = graph.copy()
         cycle = start_cycle
@@ -414,7 +437,7 @@ def optimizeCourseSuggestion(graph, max_semester_ECTS, course_rewards, semester_
                 potential = 0
                 for course in courses:
                     potential += (1 - getPenalty(course, skill_level)) * course_rewards[course]
-                potential /= len(courses)
+                #potential /= len(courses)
                 courses_with_penalty.append([courses, potential])
             courses_with_penalty_sorted = sorted(courses_with_penalty, key=lambda x: x[1], reverse=True)
             for course_penalty in courses_with_penalty_sorted:
@@ -429,7 +452,7 @@ def optimizeCourseSuggestion(graph, max_semester_ECTS, course_rewards, semester_
                                                               max_semester_ECTS, courses_ECTS, 2, courses_cycle, courses)
 
                 best_swap = []
-                best_swap_reward = -1
+                best_swap_reward = 0
                 for swap_possibility in swap_possibilities:
                     graph_copy_swap = graph_copy.copy()
                     swap_semester = swap_possibility[0]
@@ -469,10 +492,16 @@ def optimizeCourseSuggestion(graph, max_semester_ECTS, course_rewards, semester_
             takeCourses(graph_copy, optimized_plan[i][0], cycle)
             cycle = "FWS" if cycle == "SSS" else "SSS"
 
-    return(optimized_plan)
+        new_plan_reward = getPlanReward(graph, optimized_plan, start_cycle, course_rewards)[0]
+        if new_plan_reward == old_plan_reward:
+            break
+        else:
+            iterations += 1
+
+    return(optimized_plan, iterations)
 
 
-def twoStepAlgo(graph, max_semester_ECTS, max_ECTS, weights, startCycle, stop_criterion):
+def twoStepAlgo(graph, max_semester_ECTS, max_ECTS, weights, startCycle):
     initialize(graph)
     start_cycle_working_copy = startCycle
     courseRewards = getCourseRewards(graph, weights)
@@ -486,11 +515,12 @@ def twoStepAlgo(graph, max_semester_ECTS, max_ECTS, weights, startCycle, stop_cr
             greedy_order.append(semester_index)
         semester_index += 1
 
-    final_suggestion = optimizeCourseSuggestion(graph, max_semester_ECTS, courseRewards, greedy_suggestion[0],
-                             start_cycle_working_copy, stop_criterion)
+    final_suggestion, iterations = optimizeCourseSuggestion(graph, max_semester_ECTS, courseRewards,
+                                                            greedy_suggestion[0], start_cycle_working_copy)
 
-    return greedy_suggestion, final_suggestion
+    return greedy_suggestion, final_suggestion, iterations
 
+#Calculate the total and semester rewards of a graph based on the provided accumulated course->skill edge weights
 def getPlanReward(graph, plan, start_cycle, course_rewards):
     reward = 0
     rewards = []
@@ -499,17 +529,23 @@ def getPlanReward(graph, plan, start_cycle, course_rewards):
     for i in range(len(plan)):
         skill_level = getSkillLevelsGraph(graph_copy)
         semester_reward = calculateRewardFunctionWithPenalty(plan[i][0], course_rewards, skill_level)
+        semester_reward = round(semester_reward, 3)
         reward += semester_reward
         rewards.append(semester_reward)
         takeCourses(graph_copy, plan[i][0], cycle)
         cycle = "FWS" if cycle == "SSS" else "SSS"
 
+    reward = round(reward, 3)
+
     return reward, rewards
 
+#Print the difference between the actual and recommended accumulated skill level at the time of enrollment in the
+#courses of the study plan. Additionally prints the accumulated course -> skill edge weights of the regarding course
 def printSkillDiff(graph, plan, cycle, course_rewards):
     graph_copy = graph.copy()
+    i = 1
     for semester in plan:
-        print("Semester")
+        print("Semester: " + str(i))
         skill_level_graph = getSkillLevelsGraph(graph_copy)
         for course in semester[0]:
             if course in required_skill_levels:
@@ -526,82 +562,37 @@ def printSkillDiff(graph, plan, cycle, course_rewards):
             print(course + ": " + str(actual_skill - required_skill) + ", " + str(course_rewards[course]))
         takeCourses(graph_copy, semester[0], cycle)
         cycle = "FWS" if cycle == "SSS" else "SSS"
+        i += 1
 
+#Print the study plan together with the corresponding ECTS points and the normalized total reward for each skill after
+#the completion of the study plan as well as the total normalized reward
+def printStudyPlan(graph, studyPlan, cycle):
+    cycle_copy = cycle
+    graph_copy = graph.copy()
+    print("--------------------------------------------------------------")
+    i = 1
+    skill_rewards = [0] * len(skill_list)
+    total_ECTS = 0
+    for semester in studyPlan:
+        print("Semester " + str(i) + ":")
+        print(semester[0])
+        print("ECTS: " + str(semester[1]))
+        total_ECTS += semester[1]
+        new_skill_rewards = calculateSkillRewardFunctionWithPenalty(graph_copy, semester[0], default_weights)
+        skill_rewards = [a + b for a, b in zip(skill_rewards, new_skill_rewards)]
+        i += 1
+        takeCourses(graph_copy, semester[0], cycle_copy)
+        cycle_copy = "FWS" if cycle_copy == "SSS" else "SSS"
 
-
-
-G = nx.read_graphml("CourseSkillGraph_Bachelor.graphml")
-#G = nx.read_graphml("Graph_Master.graphml")
-#print(getCourseAvailability(G, 'FIN 541 Corporate Finance I - Case Study (Capital Structure, Cost of Capital and Valuation)', []))
-#print(getCourseAvailability(G, 'IS 204 Wirtschaftsinformatik IV Business Informatics IV', []))
-#print(G.nodes["CS 304 Programmierpraktikum I Programming Lab I"].get("active"))
-
-#tmp = takeCourses(G, ['ACC 626 Transaction Accounting'])
-
-#tmp = takeCourses(G, ["IS 202a Wirtschaftsinformatik IIa: Einführung in die Modellierung I: Logik Business Informatics IIa: Foundations of Modeling I: logic"])
-
-#print(getCourseAvailability(tmp, 'ACC 626 Transaction Accounting', []))
-#print(getCourseAvailability(tmp, 'IS 204 Wirtschaftsinformatik IV Business Informatics IV', []))
-#print(G.nodes["CS 304 Programmierpraktikum I Programming Lab I"].get("active"))
-
-startzeit = time.time()
-#print(getSkillLevelsGraph(G))
-#initialize(G)
-#print(required_skill_levels["Produktion"])
-#availableCourses = getAvailailableCourses(G,180)
-#availableCourses_Efficient = getAvailailableCourses_Efficient(G,180)
-#print(getCourseAvailability(G, "Produktion", ["Produktion"]))
-weights = [1, 1,
-              1, 1,
-              1, 1, 1,
-              1, 1, 1,
-              1, 1, 1,
-              1, 1,
-              1, 1,
-              1, 1, 1,
-              1, 1, 1, 1,
-              1, 1, 1, 1]
-
-#print(getCourseSuggestion(G, 26, 34, 180, weights))
-#courses_FWS = ['IS 203 Wirtschaftsinformatik III: Development and Management of Information Systems Business Informatics III: Development and Management of Information Systems', 'CS 301 Formale Grundlagen der Informatik Formal Foundations of Computer Science', 'CS 302 Praktische Informatik I Practical Computer Science I', 'CS 304 Programmierpraktikum I Programming Lab I', 'MAT 303 Lineare Algebra I Linear Algebra I', 'CS 307 Algorithmen und Datenstrukturen Algorithms and Data Structures', 'CS 309 Datenbanksysteme I Database Systems I', 'CS 408 Selected Topics in IT-Security Selected Topics in IT-Security', 'BA 450 Bachelor-Abschlussarbeit Bachelor Thesis', 'IS 201 Wirtschaftsinformatik I: Einführung und Grundlagen Business Informatics I: Introduction and Foundations', 'Finanzwirtschaft']
-#for course in courses_FWS:
-    #takeCourses(G,[course],"FWS")
-#courses_SSS = ['IS 202a Wirtschaftsinformatik IIa: Einführung in die Modellierung I: Logik Business Informatics IIa: Foundations of Modeling I: logic', 'IS 202b Wirtschaftsinformatik IIb: Einführung in die Modellierung II: Prozessmodelle Business Informatics IIb: Foundations of Modeling II: process models', 'CS 303 Praktische Informatik II Practical Computer Science II', 'CS 305 Programmierpraktikum II Programming Lab II', 'CS 306 Praktikum Software Engineering Software Engineering Practical', 'CS 406 Theoretische Informatik Theoretical Computer Science', 'Programmierkurs C/C++', 'IS 204 Wirtschaftsinformatik IV Business Informatics IV', 'CS 308 Softwaretechnik I Software Engineering I', 'ANA 301 Analysis für Wirtschaftsinformatiker Analysis for Business Informatics', 'Grundlagen der Statistik Foundations of Statistics', 'Management', 'Grundlagen des externen Rechnungswesens', 'Internes Rechnungswesen']
-#for course in courses_SSS:
-    #takeCourses(G,[course],"SSS")
-#print(getPossibleSemesterPlan_Efficient(G, 12, 34, 180, "FWS"))
-#print(getCourseAvailability(G, "Marketing", ["Recht"], "FWS"))
-
-greedy, final = twoStepAlgo(G, 34, 180, weights, "FWS", 5)
-course_rewards = getCourseRewards(G, weights)
-#final = optimizeCourseSuggestion(G, 0, 34, 180, course_rewards, [[['IS 203 Wirtschaftsinformatik III: Development and Management of Information Systems Business Informatics III: Development and Management of Information Systems', 'CS 301 Formale Grundlagen der Informatik Formal Foundations of Computer Science', 'CS 302 Praktische Informatik I Practical Computer Science I', 'CS 304 Programmierpraktikum I Programming Lab I', 'MAT 303 Lineare Algebra I Linear Algebra I'], 34], [['IS 202a Wirtschaftsinformatik IIa: Einführung in die Modellierung I: Logik Business Informatics IIa: Foundations of Modeling I: logic', 'IS 202b Wirtschaftsinformatik IIb: Einführung in die Modellierung II: Prozessmodelle Business Informatics IIb: Foundations of Modeling II: process models', 'IS 204 Wirtschaftsinformatik IV Business Informatics IV', 'CS 303 Praktische Informatik II Practical Computer Science II', 'CS 305 Programmierpraktikum II Programming Lab II', 'CS 306 Praktikum Software Engineering Software Engineering Practical', 'Präsentationskompetenz und Rhetorik Presentation skills and rhetoric', 'Programmierkurs C/C++'], 34], [['IS 201 Wirtschaftsinformatik I: Einführung und Grundlagen Business Informatics I: Introduction and Foundations', 'CS 307 Algorithmen und Datenstrukturen Algorithms and Data Structures', 'CS 309 Datenbanksysteme I Database Systems I', 'CS 405 Künstliche Intelligenz Artificial Intelligence', 'CS 408 Selected Topics in IT-Security Selected Topics in IT-Security'], 34], [['CS 308 Softwaretechnik I Software Engineering I', 'ANA 301 Analysis für Wirtschaftsinformatiker Analysis for Business Informatics', 'Grundlagen der Statistik Foundations of Statistics', 'SM 444 Bachelorseminar Prof. Bizer Seminar', 'Management'], 33], [['Zeitmanagement Time Management', 'Change- und Projektmanagement Projectmanagement', 'Finanzwirtschaft', 'Marketing', 'Produktion', 'Recht'], 27], [['BA 450 Bachelor-Abschlussarbeit Bachelor Thesis', 'Grundlagen des externen Rechnungswesens'], 18]]
-#, "FWS", 6, 0.01)
-#greedy = ([[['IS 203 Wirtschaftsinformatik III: Development and Management of Information Systems Business Informatics III: Development and Management of Information Systems', 'CS 301 Formale Grundlagen der Informatik Formal Foundations of Computer Science', 'CS 302 Praktische Informatik I Practical Computer Science I', 'CS 304 Programmierpraktikum I Programming Lab I', 'MAT 303 Lineare Algebra I Linear Algebra I'], 34], [['IS 202a Wirtschaftsinformatik IIa: Einführung in die Modellierung I: Logik Business Informatics IIa: Foundations of Modeling I: logic', 'IS 202b Wirtschaftsinformatik IIb: Einführung in die Modellierung II: Prozessmodelle Business Informatics IIb: Foundations of Modeling II: process models', 'IS 204 Wirtschaftsinformatik IV Business Informatics IV', 'CS 303 Praktische Informatik II Practical Computer Science II', 'CS 305 Programmierpraktikum II Programming Lab II', 'CS 306 Praktikum Software Engineering Software Engineering Practical', 'Präsentationskompetenz und Rhetorik Presentation skills and rhetoric', 'Programmierkurs C/C++'], 34], [['IS 201 Wirtschaftsinformatik I: Einführung und Grundlagen Business Informatics I: Introduction and Foundations', 'CS 307 Algorithmen und Datenstrukturen Algorithms and Data Structures', 'CS 309 Datenbanksysteme I Database Systems I', 'CS 405 Künstliche Intelligenz Artificial Intelligence', 'CS 408 Selected Topics in IT-Security Selected Topics in IT-Security'], 34], [['CS 308 Softwaretechnik I Software Engineering I', 'ANA 301 Analysis für Wirtschaftsinformatiker Analysis for Business Informatics', 'Grundlagen der Statistik Foundations of Statistics', 'SM 444 Bachelorseminar Prof. Bizer Seminar', 'Management'], 33], [['Zeitmanagement Time Management', 'Change- und Projektmanagement Projectmanagement', 'Finanzwirtschaft', 'Marketing', 'Produktion', 'Recht'], 27], [['BA 450 Bachelor-Abschlussarbeit Bachelor Thesis', 'Grundlagen des externen Rechnungswesens'], 18]], 180)
-#final = [[['IS 203 Wirtschaftsinformatik III: Development and Management of Information Systems Business Informatics III: Development and Management of Information Systems', 'CS 301 Formale Grundlagen der Informatik Formal Foundations of Computer Science', 'CS 302 Praktische Informatik I Practical Computer Science I', 'CS 304 Programmierpraktikum I Programming Lab I', 'MAT 303 Lineare Algebra I Linear Algebra I'], 34], [['IS 202a Wirtschaftsinformatik IIa: Einführung in die Modellierung I: Logik Business Informatics IIa: Foundations of Modeling I: logic', 'IS 202b Wirtschaftsinformatik IIb: Einführung in die Modellierung II: Prozessmodelle Business Informatics IIb: Foundations of Modeling II: process models', 'CS 303 Praktische Informatik II Practical Computer Science II', 'CS 305 Programmierpraktikum II Programming Lab II', 'Präsentationskompetenz und Rhetorik Presentation skills and rhetoric', 'SM 444 Bachelorseminar Prof. Bizer Seminar', 'ANA 301 Analysis für Wirtschaftsinformatiker Analysis for Business Informatics'], 32], [['IS 201 Wirtschaftsinformatik I: Einführung und Grundlagen Business Informatics I: Introduction and Foundations', 'CS 307 Algorithmen und Datenstrukturen Algorithms and Data Structures', 'Finanzwirtschaft', 'Marketing', 'Zeitmanagement Time Management'], 27], [['CS 308 Softwaretechnik I Software Engineering I', 'Grundlagen der Statistik Foundations of Statistics', 'Management', 'IS 204 Wirtschaftsinformatik IV Business Informatics IV', 'CS 306 Praktikum Software Engineering Software Engineering Practical'], 31], [['Change- und Projektmanagement Projectmanagement', 'Produktion', 'Recht', 'CS 408 Selected Topics in IT-Security Selected Topics in IT-Security', 'CS 405 Künstliche Intelligenz Artificial Intelligence', 'CS 309 Datenbanksysteme I Database Systems I'], 34], [['BA 450 Bachelor-Abschlussarbeit Bachelor Thesis', 'Grundlagen des externen Rechnungswesens', 'Programmierkurs C/C++'], 22]]
-
-#printSkillDiff(G, final, "FWS", course_rewards)
-
-
-#final = optimizeCourseSuggestion(G, 34, 180, course_rewards, greedy[0], "FWS", 6, 0.01)
-
-print(greedy)
-print(final)
-print("Reward greedy: " + str(getPlanReward(G, greedy[0], "FWS", course_rewards)))
-print("Reward final: " + str(getPlanReward(G, final, "FWS", course_rewards)))
-#print(getCourseRewards(G,))
-#print(getAvailailableCourses_Efficient(G, 180, "FWS", 0))
-endzeit = time.time()
-ausfuehrungszeit = endzeit - startzeit
-print(f"Die Methode hat {ausfuehrungszeit:.5f} Sekunden benötigt.")
-
-#for i in range(0,50):
-#   print(semesterPlans[i])
-#print(G.nodes["ACC 530 Group Accounting"].get("ECTS"))
-#print(getSkillLevels(G))
-#print(checkEnoughECTS(G, "IS 201 Wirtschaftsinformatik I: Einführung und Grundlagen Business Informatics I: Introduction and Foundations", 180))
-#print(required_skill_levels)
-#print(getAvailailableCourses_Efficient(G, 180))
-
+    print("--------------------------------------------------------------")
+    print("Total ECTS: " + str(total_ECTS))
+    print("--------------------------------------------------------------")
+    print("Final Normalized Rewards:")
+    total = sum(skill_rewards)
+    for index in range(len(skill_rewards)):
+        print(str(skill_list[index]) + " :" + str(round(skill_rewards[index], 3)))
+    print("Total: " + str(round(total,3)))
+    print("--------------------------------------------------------------")
 
 
 

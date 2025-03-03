@@ -7,6 +7,7 @@ def cut_tables(tables):
         if len(tables[i].columns) > 2:
             tables[i] = tables[i].iloc[:, :2]
 
+#Mapping for values contained in the first column. Used to standardize the values
 def mapping_first_row(text):
     if isinstance(text, str):
         if re.match("M Lodul", text):
@@ -19,7 +20,7 @@ def mapping_first_row(text):
             return text
     else:
         ""
-
+#Mapping for values contained in the second column. Used to standardize the values
 def mapping_second_row(text):
     if isinstance(text, str):
         if re.match(r"Herbst-/Frühjahrssemester", text):
@@ -49,6 +50,7 @@ def applyMapping(tables):
         tables[i][tables[i].columns[1]] = tables[i][tables[i].columns[1]].apply(mapping_second_row)
         tables[i][tables[i].columns[1]] = tables[i][tables[i].columns[1]].str.lstrip()
 
+#Reconstructs tables that were split because they span multiple pages in the PDF file
 def combine_splitted_tables (last_cell, tables):
     table_ends = []
     i=0
@@ -81,23 +83,14 @@ def combine_splitted_tables (last_cell, tables):
 
     return tables
 
+#Remove tabs
 def clean(tables):
     for i in range(len(tables)):
         tables[i] = tables[i].replace(r"\t+", " ", regex=True)
         tables[i] = tables[i].replace(r"\s+", " ", regex=True)
     return tables
 
-def append_raw_knowledge_field(fields, tables):
-    for i in range(len(tables)):
-        raw_knowledge = tables[i].iloc[0,0] + " " + tables[i].iloc[0,1]
-        for field in fields:
-            if tables[i][tables[i].columns[0]].isin([field]).any():
-                row = tables[i].loc[tables[i][tables[i].columns[0]] == field]
-                raw_knowledge += " " + row.iloc[0,1]
-
-        tables[i].loc[tables[i].index.max() + 1] = ["Raw Knowledge", raw_knowledge]
-    return tables
-
+#Combine multiple rows that contain information that should be in one single row
 def combine_fields(tables):
     for i in range(len(tables)):
         indices_to_drop = []
@@ -112,6 +105,7 @@ def combine_fields(tables):
         tables[i] = tables[i].drop(index=indices_to_drop)
     return tables
 
+#Filter the course tables to only contain courses that are relevant to the Bachelor's Program in Business Informatics
 def filter_table(tables, relevant_courses, x, y):
     relevant_courses_names = relevant_courses["Course"].tolist()
 
@@ -124,6 +118,7 @@ def filter_table(tables, relevant_courses, x, y):
                 break
     return filtered_tables
 
+#Get the list of courses that is relevant to the Bachelor's Program in Business Informatics
 def get_relevant_courses(path):
     tables_raw = camelot.read_pdf(path, pages="all", flavor="lattice")
     tables = [table.df for table in tables_raw]
@@ -145,6 +140,7 @@ def get_relevant_courses(path):
     courses = pd.concat(tables, axis=0, ignore_index=True)
     return courses
 
+#Extract the courses from the additional module catalogs
 def get_additional_courses(relevant_courses, paths, end_cells, coordinates):
     tables = []
     for i in range(len(paths)):
@@ -177,6 +173,7 @@ def get_additional_courses(relevant_courses, paths, end_cells, coordinates):
 
     return tables
 
+#Manually create the DataFrames for the Courses of the Bachelor's Program in Economics
 def get_VWL_courses():
     tables = []
     df = pd.DataFrame(columns=["0", "1"])
@@ -249,7 +246,7 @@ def get_VWL_courses():
     applyMapping(tables)
     return tables
 
-
+#Extract the courses from the module catalog of the Bachelor's Program in Business Informatics
 def get_courses(mainFile):
     tables_raw = camelot.read_pdf(mainFile, pages = "all", strip_text="\n", line_scale=30)
     tables = [table.df for table in tables_raw]
@@ -262,6 +259,7 @@ def get_courses(mainFile):
     applyMapping(tables)
     return tables
 
+#Apply fixes after the extraction process to avoid overwriting manual work
 def post_fixes(courses):
     applyMapping(courses)
     applyMapping(courses)
